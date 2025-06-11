@@ -7,7 +7,7 @@ namespace integra_dados.Repository;
 public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : ISupervisoryRepository
 {
 
-    public Task<Document> FindByName(string name)
+    public Task<SupervisoryRegistry> FindByName(string name)
     {
         throw new NotImplementedException();
     }
@@ -16,5 +16,20 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
     {
         await supervisoryRegistryCollection.InsertOneAsync(document);
         return document;
+    }
+
+    public Task<SupervisoryRegistry> FindById(int idSistema)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void DeleteByIdSistema(int idSistema)
+    {
+        throw new NotImplementedException();
+    }
+
+    public List<SupervisoryRegistry> FindAll()
+    {
+        throw new NotImplementedException();
     }
 }

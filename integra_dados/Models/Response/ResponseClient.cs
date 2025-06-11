@@ -16,4 +16,11 @@ public class ResponseClient
         Response = response;
         ResponseMessage = responseMessage;
     }
+    
+    public ResponseClient (String responseMessage) {
+        ResponseStatus = HttpStatusCode.OK;
+        WasSuccessful = true;
+        Response = null;
+        ResponseMessage = responseMessage;
+    }
 }
