@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
 
+[ApiController]
+[Route("/supervisory/registry/")]
 public class SupervisoryController(SupervisoryService supervisoryService) : ControllerBase
 {
     [HttpPost("create")]
@@ -44,7 +46,7 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
     }
     
     [HttpGet("edit")]
-    public IActionResult editSupervisory([FromQuery] SupervisoryRegistry supervisory)
+    public IActionResult EditSupervisory([FromQuery] SupervisoryRegistry supervisory)
     {
         var responseFromEdition = supervisoryService.Edit(supervisory);
         return StatusCode((int)responseFromEdition.ResponseStatus, responseFromEdition);

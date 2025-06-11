@@ -1,6 +1,7 @@
 using integra_dados.Config;
 using integra_dados.Models;
 using integra_dados.Repository;
+using integra_dados.Services;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,28 +13,25 @@ builder.Services.AddRazorPages();
 var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbConfig>();
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var settings = builder.Configuration
-        .GetSection("MongoDb").Get<MongoDbConfig>();
-    return new MongoClient(settings.ConnectionString);
+    var connectionString = builder.Configuration.GetConnectionString("MongoDb");
+    return new MongoClient(connectionString);
 });
-builder.Services.AddSingleton<IMongoDatabase>(s =>
+
+builder.Services.AddScoped(s =>
 {
     var client = s.GetRequiredService<IMongoClient>();
-    // Replace "YourDatabaseName" with the actual name of your MongoDB database
-    return client.GetDatabase(mongoSettings.DatabaseName);
+    var database = client.GetDatabase(mongoSettings.DatabaseName);
+    return database.GetCollection<SupervisoryRegistry>(nameof(SupervisoryRegistry));
 });
-builder.Services.AddSingleton<ISupervisoryRepository, SupervisoryRepository>(s =>
-{
-    var database = s.GetRequiredService<IMongoDatabase>();
-    var collection = database.GetCollection<SupervisoryRegistry>(nameof(SupervisoryRegistry));
-    return new SupervisoryRepository(collection);
-});
+
+builder.Services.AddScoped<ISupervisoryRepository, SupervisoryRepository>();
+builder.Services.AddScoped<SupervisoryService>();
 
 // Http server config
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(serverSettings.Port); // Escuta em todas as interfaces de rede, porta 5000
+    options.ListenAnyIP(serverSettings.Port);
 });
 
 builder.Services.AddControllers();
@@ -51,13 +49,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+// app.UseHttpsRedirection();
+// app.UseStaticFiles();
 
-app.UseRouting();
+// app.UseRouting();
 
-app.UseAuthorization();
+// app.UseAuthorization();
 
-app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
