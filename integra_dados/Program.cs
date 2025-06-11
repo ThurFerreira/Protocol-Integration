@@ -1,4 +1,6 @@
 using integra_dados.Config;
+using integra_dados.Models;
+using integra_dados.Repository;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,11 +9,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 // MongoDB
+var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbConfig>();
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var settings = builder.Configuration
         .GetSection("MongoDb").Get<MongoDbConfig>();
     return new MongoClient(settings.ConnectionString);
+});
+builder.Services.AddSingleton<IMongoDatabase>(s =>
+{
+    var client = s.GetRequiredService<IMongoClient>();
+    // Replace "YourDatabaseName" with the actual name of your MongoDB database
+    return client.GetDatabase(mongoSettings.DatabaseName);
+});
+builder.Services.AddSingleton<ISupervisoryRepository, SupervisoryRepository>(s =>
+{
+    var database = s.GetRequiredService<IMongoDatabase>();
+    var collection = database.GetCollection<SupervisoryRegistry>(nameof(SupervisoryRegistry));
+    return new SupervisoryRepository(collection);
 });
 
 // Http server config
