@@ -1,7 +1,14 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace integra_dados.Models;
 
 public class Registry
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? _id { get; set; }
+
     public string Uri { get; set; }
     public int Status { get; set; }
     public int IdSistema { get; set; }
@@ -18,7 +25,7 @@ public class Registry
     public int Counter { get; set; } = 0;
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public object LastRegisteredValue { get; set; }
+    public object? LastRegisteredValue { get; set; }
     
     public void SetIdSistema()
     {
@@ -42,7 +49,7 @@ public class Registry
 
     public void IncrementCounter()
     {
-        Counter++;
+        Counter += 1;
     }
     
     public void UpdateRegistry(int onOffSwitchValue)
