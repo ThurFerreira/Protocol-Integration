@@ -13,7 +13,7 @@ builder.Services.AddRazorPages();
 var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbConfig>();
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("MongoDb");
+    var connectionString = mongoSettings.ConnectionString;
     return new MongoClient(connectionString);
 });
 

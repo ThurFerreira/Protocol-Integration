@@ -6,7 +6,7 @@ using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
-public class SupervisoryService(SupervisoryRepository supervisoryRepository)
+public class SupervisoryService(ISupervisoryRepository supervisoryRepository)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
@@ -75,6 +75,6 @@ public class SupervisoryService(SupervisoryRepository supervisoryRepository)
     
     public void Delete(int idSistema) {
         supervisoryRepository.DeleteByIdSistema(idSistema);
-        RegistryManager.UpdateRegistries(supervisoryRepository.FindAll());
+        RegistryManager.UpdateRegistries(supervisoryRepository.FindAll().Result);
     }
 }

@@ -7,9 +7,11 @@ namespace integra_dados.Repository;
 public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : ISupervisoryRepository
 {
 
-    public Task<SupervisoryRegistry> FindByName(string name)
+    public async Task<SupervisoryRegistry> FindByName(string name)
     {
-        throw new NotImplementedException();
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Nome, name);
+        using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
+        return await cursor.FirstOrDefaultAsync();
     }
 
     public async Task<SupervisoryRegistry> Save(SupervisoryRegistry document)
@@ -18,18 +20,23 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return document;
     }
 
-    public Task<SupervisoryRegistry> FindById(int idSistema)
+    public async Task<SupervisoryRegistry> FindById(int idSistema)
     {
-        throw new NotImplementedException();
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.IdSistema, idSistema);
+        using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
+        return await cursor.FirstOrDefaultAsync();
     }
 
-    public void DeleteByIdSistema(int idSistema)
+    public async Task<bool> DeleteByIdSistema(int idSistema)
     {
-        throw new NotImplementedException();
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.IdSistema, idSistema);
+        var result = await supervisoryRegistryCollection.DeleteOneAsync(filter);
+        return result.DeletedCount > 0;
     }
 
-    public List<SupervisoryRegistry> FindAll()
+    public async Task<List<SupervisoryRegistry>> FindAll()
     {
-        throw new NotImplementedException();
+        var result = await supervisoryRegistryCollection.FindAsync(FilterDefinition<SupervisoryRegistry>.Empty);
+        return await result.ToListAsync();
     }
 }
