@@ -3,12 +3,17 @@ using integra_dados.Models;
 using integra_dados.Repository;
 using integra_dados.Services;
 using integra_dados.Services.Kafka;
+using integra_dados.Services.Modbus;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Modbus
+builder.Services.AddSingleton<ModbusApi>();
+
 // Kafka
 builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("Kafka"));
 builder.Services.AddSingleton<KafkaService>();
