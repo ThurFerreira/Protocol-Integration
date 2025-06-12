@@ -8,7 +8,7 @@ using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
-public class SupervisoryService(ISupervisoryRepository supervisoryRepository, KafkaService kafkaService)
+public class SupervisoryService(ISupervisoryRepository supervisoryRepository, KafkaService kafkaService, ModbusApi modbusApi)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
@@ -94,7 +94,8 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
 //                executorService.submit(() -> {
                 MonitorSupervisory(registry);
 //                });
-            } registry.IncrementCounter();
+            } 
+            registry.IncrementCounter();
         }
     }
 
@@ -102,20 +103,14 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
     {
         if (registry.TipoDado.Equals("discreteInput"))
         {
-            var reisterValue = GetSupervisoryDiscreteInputValue(registry);
-            registry.UpdateRegistry(reisterValue);
+            var registerValue = GetSupervisoryDiscreteInputValue(registry);
+            registry.UpdateRegistry(registerValue);
             RegistryManager.ReplaceRegistry(registry);
-            // if (supervisoryRegistry.shouldSendToBroker(registerValue)) {
-            //     if (registerValue != VALUE_NOT_VALID) {
-            //         var brokerPackage = createBrokerPackage(supervisoryRegistry, registerValue);
-            //         sendSupervisoryInfoToBroker(brokerPackage, supervisoryRegistry.getTopicoBroker());
-            //     }
-            // }
-            if (registry.ShouldSendToBroker(reisterValue))
+            if (registry.ShouldSendToBroker(registerValue))
             {
-                if (reisterValue != -1)
+                if (registerValue != -1)
                 {
-                    Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, reisterValue);
+                    Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValue);
                     kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                 }
             }
@@ -124,6 +119,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
 
     private int GetSupervisoryDiscreteInputValue(SupervisoryRegistry registry)
     {
-        return ModbusApi.ReadDiscreteInput(registry.EnderecoInicio, registry.QuantidadeTags);
+        var value = ModbusApi.ReadDiscreteInput(registry);
+        return value;
     }
 }

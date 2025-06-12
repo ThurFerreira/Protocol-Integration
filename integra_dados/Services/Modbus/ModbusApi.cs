@@ -7,6 +7,11 @@ public class ModbusApi
 {
     public static ModbusClient? ApiClient;
 
+    public ModbusApi()
+    {
+        ApiClient = new ModbusClient();
+    }
+
     public static bool ConnectClientModbus(SupervisoryRegistry registry)
     {
         ApiClient.IPAddress = registry.Ip;
@@ -38,13 +43,17 @@ public class ModbusApi
         return false;
     }
 
-    public static int ReadDiscreteInput(int startingAddress, int numberOfInputs)
+    public static int ReadDiscreteInput(SupervisoryRegistry registry)
     {
-        if (ApiClient.Connected)
+        if (!ApiClient.Connected)
         {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadInputRegisters(startingAddress, numberOfInputs);
+                var serverResponse = ApiClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua

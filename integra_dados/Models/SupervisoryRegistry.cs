@@ -2,7 +2,6 @@ namespace integra_dados.Models;
 
 public class SupervisoryRegistry : Registry
 {
-    public string Id { get; set; }
     public int FreqLeituraSeg { get; set; }
     public string Protocolo { get; set; }
 
