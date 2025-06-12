@@ -9,6 +9,7 @@ namespace integra_dados.Services.Kafka;
 public class KafkaService
 {
     private readonly IProducer<string, string> _producer;
+    private readonly ILogger<KafkaService> _logger;
 
     public KafkaService(IOptions<KafkaConfig> kafkaConfig, ILogger<KafkaService> logger)
     {
@@ -38,8 +39,8 @@ public class KafkaService
         try
         {
             //TODO erro na serialização e publicar no kafka
-            string json = JsonSerializer.Serialize(pkg);
-            DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<Null, string> { Value = pkg} );
+            string json = JsonConvert.SerializeObject(pkg);
+            DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<string, string> { Key = "", Value = json} );
             // _logger.LogInformation($"Message delivered to {result.TopicPartitionOffset}");
         }
         catch (System.Exception ex)

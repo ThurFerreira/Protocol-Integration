@@ -2,12 +2,16 @@ using integra_dados.Config;
 using integra_dados.Models;
 using integra_dados.Repository;
 using integra_dados.Services;
+using integra_dados.Services.Kafka;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+// Kafka
+builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("Kafka"));
+builder.Services.AddSingleton<KafkaService>();
 
 // MongoDB
 var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbConfig>();
@@ -35,6 +39,9 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 builder.Services.AddControllers();
+
+// Background Services
+builder.Services.AddHostedService<SupervisoryScheduler>();
 
 // Adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();
