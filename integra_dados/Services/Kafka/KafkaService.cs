@@ -1,0 +1,51 @@
+using Confluent.Kafka;
+using integra_dados.Config;
+using integra_dados.Models;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+
+namespace integra_dados.Services.Kafka;
+
+public class KafkaService
+{
+    private readonly IProducer<string, string> _producer;
+
+    public KafkaService(IOptions<KafkaConfig> kafkaConfig, ILogger<KafkaService> logger)
+    {
+        //Configurando o producer kafka
+        var config = new ProducerConfig()
+        {
+            BootstrapServers = kafkaConfig.Value.BootstrapServers,
+        };
+        
+        //criando de fato o produtor kafka
+        _producer = new ProducerBuilder<string, string>(config).Build();
+    }
+
+    public Event1000_1 CreateBrokerPackage(SupervisoryRegistry registry, int reisterValue)
+    {
+        return new Event1000_1(
+            registry.IdSistema,
+            registry.Nome,
+            0,
+            reisterValue,
+            registry.UltimaAtualizacao.Millisecond
+        );
+    }
+
+    public async void Publish(string topic, Event1000_1 pkg)
+    {
+        try
+        {
+            //TODO erro na serialização e publicar no kafka
+            string json = JsonSerializer.Serialize(pkg);
+            DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<Null, string> { Value = pkg} );
+            // _logger.LogInformation($"Message delivered to {result.TopicPartitionOffset}");
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError($"Unexpected error: {ex.Message}"); ;
+        }
+    }
+    
+}
