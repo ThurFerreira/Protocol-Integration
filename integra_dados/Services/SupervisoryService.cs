@@ -116,7 +116,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
                 if (reisterValue != -1)
                 {
                     Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, reisterValue);
-                    s
+                    kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                 }
             }
         }
