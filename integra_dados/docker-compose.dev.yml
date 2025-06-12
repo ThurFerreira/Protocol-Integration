@@ -1,0 +1,26 @@
+version: '3.4'
+
+services:
+  integra_dados:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: integra_dados-csharp
+    image: integra_dados
+    ports:
+      - "7001:7001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    deploy:
+      resources:
+        limits:
+          cpus: '0.60'
+          memory: 60G
+        reservations:
+          cpus: '0.40'
+          memory: 40G
+
+networks:
+  default:
+    external:
+      name: bluenetwork

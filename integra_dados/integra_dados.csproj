@@ -4,6 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -77,6 +78,12 @@
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.4" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.4" />
       <PackageReference Include="System.IO.Ports" Version="10.0.0-preview.5.25277.114" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 </Project>
