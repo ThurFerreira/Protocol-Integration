@@ -13,6 +13,8 @@ public class KafkaService
 
     public KafkaService(IOptions<KafkaConfig> kafkaConfig, ILogger<KafkaService> logger)
     {
+        _logger = logger;
+        
         //Configurando o producer kafka
         var config = new ProducerConfig()
         {
@@ -38,10 +40,9 @@ public class KafkaService
     {
         try
         {
-            //TODO erro na serialização e publicar no kafka
             string json = JsonConvert.SerializeObject(pkg);
             DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<string, string> { Key = "", Value = json} );
-            // _logger.LogInformation($"Message delivered to {result.TopicPartitionOffset}");
+            _logger.LogInformation("Message " + json + $" delivered to {result.TopicPartitionOffset}");
         }
         catch (System.Exception ex)
         {
