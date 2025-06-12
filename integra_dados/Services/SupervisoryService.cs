@@ -2,11 +2,13 @@ using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Repository;
+using integra_dados.Services.Kafka;
+using integra_dados.Services.Modbus;
 using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
-public class SupervisoryService(ISupervisoryRepository supervisoryRepository)
+public class SupervisoryService(ISupervisoryRepository supervisoryRepository, KafkaService kafkaService)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
@@ -76,5 +78,52 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository)
     public void Delete(int idSistema) {
         supervisoryRepository.DeleteByIdSistema(idSistema);
         RegistryManager.UpdateRegistries(supervisoryRepository.FindAll().Result);
+    }
+    
+    public void TriggerBroker(List<SupervisoryRegistry> registries)
+    {
+        foreach (SupervisoryRegistry supervisoryRegistry in registries)
+        {
+            CheckWhetherShouldTriggerBroker(supervisoryRegistry);
+        }
+    }
+
+    public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry) {
+        if (registry.FreqLeituraSeg > 0) {
+            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg)) {
+//                executorService.submit(() -> {
+                MonitorSupervisory(registry);
+//                });
+            } registry.IncrementCounter();
+        }
+    }
+
+    private void MonitorSupervisory(SupervisoryRegistry registry)
+    {
+        if (registry.TipoDado.Equals("discreteInput"))
+        {
+            var reisterValue = GetSupervisoryDiscreteInputValue(registry);
+            registry.UpdateRegistry(reisterValue);
+            RegistryManager.ReplaceRegistry(registry);
+            // if (supervisoryRegistry.shouldSendToBroker(registerValue)) {
+            //     if (registerValue != VALUE_NOT_VALID) {
+            //         var brokerPackage = createBrokerPackage(supervisoryRegistry, registerValue);
+            //         sendSupervisoryInfoToBroker(brokerPackage, supervisoryRegistry.getTopicoBroker());
+            //     }
+            // }
+            if (registry.ShouldSendToBroker(reisterValue))
+            {
+                if (reisterValue != -1)
+                {
+                    Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, reisterValue);
+                    s
+                }
+            }
+        }
+    }
+
+    private int GetSupervisoryDiscreteInputValue(SupervisoryRegistry registry)
+    {
+        return ModbusApi.ReadDiscreteInput(registry.EnderecoInicio, registry.QuantidadeTags);
     }
 }
