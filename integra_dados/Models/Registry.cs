@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 
 namespace integra_dados.Models;
 
@@ -11,6 +12,7 @@ public class Registry
 
     public string? Uri { get; set; }
     public int Status { get; set; }
+    [JsonIgnore]
     public int IdSistema { get; set; }
     public string? Nome { get; set; }
     public string? Fonte { get; set; }
