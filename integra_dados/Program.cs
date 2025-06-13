@@ -43,6 +43,16 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(serverSettings.Port);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowOtherApp", policy =>
+    {
+        policy.AllowAnyOrigin()     // Permite qualquer origem
+            .AllowAnyMethod()     // Permite qualquer método HTTP
+            .AllowAnyHeader();    // Permite qualquer header
+    });
+});
+
 builder.Services.AddControllers();
 
 // Background Services
@@ -55,11 +65,13 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
+
+app.UseCors("AllowOtherApp");
 
 // app.UseHttpsRedirection();
 // app.UseStaticFiles();
