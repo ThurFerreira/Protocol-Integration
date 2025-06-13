@@ -56,7 +56,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 // Background Services
-// builder.Services.AddHostedService<SupervisoryScheduler>();
+builder.Services.AddHostedService<SupervisoryScheduler>();
 
 // Adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();

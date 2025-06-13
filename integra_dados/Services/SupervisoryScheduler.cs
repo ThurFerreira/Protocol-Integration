@@ -7,26 +7,32 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using (var scope = serviceProvider.CreateScope())
+        // Inicializa o RegistryManager uma vez no início
+        using (var initialScope = serviceProvider.CreateScope())
         {
-            var repository = scope.ServiceProvider.GetService<ISupervisoryRepository>();
-            RegistryManager.UpdateRegistries(repository.FindAll().Result);
+            var repository = initialScope.ServiceProvider.GetRequiredService<ISupervisoryRepository>();
+            var allRegistries = await repository.FindAll();
+            RegistryManager.UpdateRegistries(allRegistries);
+        }
 
-            while (!stoppingToken.IsCancellationRequested)
+        // Loop principal do serviço
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
             {
-                var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
-
-                try
+                using (var scope = serviceProvider.CreateScope())
                 {
+                    var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
                     supervisoryService.TriggerBroker(RegistryManager.GetRegistries());
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("[ERROR]: SupervisoryService " + ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[ERROR]: SupervisoryService " + ex);
             }
 
-            await Task.Delay(5000, stoppingToken); // 5 segundos
+            // Aguarda 5 segundos antes de repetir
+            await Task.Delay(5000, stoppingToken);
         }
     }
 }
