@@ -45,7 +45,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("http://", policy =>
+    options.AddPolicy("AllowOtherApp", policy =>
     {
         policy.AllowAnyOrigin()     // Permite qualquer origem
             .AllowAnyMethod()     // Permite qualquer método HTTP

@@ -8,7 +8,7 @@ services:
     container_name: integra_dados-csharp
     image: integra_dados
     ports:
-      - "7001:80"
+      - "7001:7001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     deploy:
