@@ -9,16 +9,16 @@ public class Registry
     [BsonRepresentation(BsonType.ObjectId)]
     public string? _id { get; set; }
 
-    public string Uri { get; set; }
+    public string? Uri { get; set; }
     public int Status { get; set; }
     public int IdSistema { get; set; }
-    public string Nome { get; set; }
-    public string Fonte { get; set; }
-    public string TipoDado { get; set; }
-    public string DescricaoPontoGeografico { get; set; }
-    public string Observacao { get; set; }
+    public string? Nome { get; set; }
+    public string? Fonte { get; set; }
+    public string? TipoDado { get; set; }
+    public string? DescricaoPontoGeografico { get; set; }
+    public string? Observacao { get; set; }
     public DateTime UltimaAtualizacao { get; set; }
-    public string TopicoBroker { get; set; }
+    public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
