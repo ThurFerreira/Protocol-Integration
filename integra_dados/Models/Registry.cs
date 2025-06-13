@@ -22,41 +22,33 @@ public class Registry
     public bool OtimizarPublicacaoBroker { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
-    public int Counter { get; set; } = 0;
+    public long LastRead { get; set; } = 0;
 
     [System.Text.Json.Serialization.JsonIgnore]
     public object? LastRegisteredValue { get; set; }
-    
+
     public void SetIdSistema()
     {
         IdSistema = Util.Util.GenerateRandomNumber();
     }
-    
+
     public bool IsTimeToSendMessage(int freqLeitura)
     {
-        if (Counter == freqLeitura)
+        long now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        if (LastRead == 0 || now >= LastRead + (freqLeitura * 1000))
         {
-            ResetCounter();
+            LastRead = now;
             return true;
         }
+
         return false;
     }
-    
-    public void ResetCounter()
-    {
-        Counter = 0;
-    }
 
-    public void IncrementCounter()
-    {
-        Counter += 1;
-    }
-    
     public void UpdateRegistry(int onOffSwitchValue)
     {
         const int VALUE_NOT_VALID = -1;
         UpdateDate();
-    
+
         if (onOffSwitchValue == VALUE_NOT_VALID)
         {
             UpgradeStatusToUnavailable();
@@ -71,19 +63,29 @@ public class Registry
     {
         UltimaAtualizacao = DateTime.Now;
     }
-    
-    public void UpgradeStatusToAvailable () {
-        Status = (int) StatusVariable.AVAILABLE;
+
+    public void UpgradeStatusToAvailable()
+    {
+        Status = (int)StatusVariable.AVAILABLE;
     }
-    public void UpgradeStatusToUnavailable () {
-        Status = (int) StatusVariable.UNAVAILABLE;
+
+    public void UpgradeStatusToUnavailable()
+    {
+        Status = (int)StatusVariable.UNAVAILABLE;
     }
-    
-    public bool ShouldSendToBroker(Object actualRegisteredValue) {
-        if (OtimizarPublicacaoBroker) {
-            if (actualRegisteredValue.Equals(LastRegisteredValue)) {
+
+    public bool ShouldSendToBroker(Object actualRegisteredValue)
+    {
+        if (OtimizarPublicacaoBroker)
+        {
+            if (actualRegisteredValue.Equals(LastRegisteredValue))
+            {
                 return false;
-            } LastRegisteredValue = actualRegisteredValue;
-        } return true;
+            }
+
+            LastRegisteredValue = actualRegisteredValue;
+        }
+
+        return true;
     }
 }

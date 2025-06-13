@@ -91,11 +91,9 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
     public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry) {
         if (registry.FreqLeituraSeg > 0) {
             if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg)) {
-//                executorService.submit(() -> {
+                //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
-//                });
             } 
-            registry.IncrementCounter();
         }
     }
 
@@ -104,6 +102,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         if (registry.TipoDado.Equals("discreteInput"))
         {
             var registerValue = GetSupervisoryDiscreteInputValue(registry);
+            Console.WriteLine("register registerValue: " + registerValue);
             registry.UpdateRegistry(registerValue);
             RegistryManager.ReplaceRegistry(registry);
             if (registry.ShouldSendToBroker(registerValue))

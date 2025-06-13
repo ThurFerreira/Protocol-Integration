@@ -40,6 +40,7 @@ public class KafkaService
     {
         try
         {
+            ;
             string json = JsonConvert.SerializeObject(pkg);
             DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<string, string> { Key = "", Value = json} );
             _logger.LogInformation("Message " + json + $" delivered to {result.TopicPartitionOffset}");
