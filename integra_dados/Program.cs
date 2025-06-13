@@ -40,13 +40,12 @@ builder.Services.AddScoped<SupervisoryService>();
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Listen(System.Net.IPAddress.Any, 7001);
-    // options.ListenAnyIP(serverSettings.Port);
+    options.ListenAnyIP(serverSettings.Port);
 });
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowOtherApp", policy =>
+    options.AddPolicy("http://", policy =>
     {
         policy.AllowAnyOrigin()     // Permite qualquer origem
             .AllowAnyMethod()     // Permite qualquer método HTTP

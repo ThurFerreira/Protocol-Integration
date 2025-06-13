@@ -19,7 +19,7 @@ services:
         reservations:
           cpus: '0.40'
           memory: 40G
-
+    
 networks:
   default:
     external:

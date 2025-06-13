@@ -80,10 +80,4 @@
       <PackageReference Include="System.IO.Ports" Version="10.0.0-preview.5.25277.114" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-
 </Project>
