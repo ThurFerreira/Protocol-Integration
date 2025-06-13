@@ -59,5 +59,16 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
         return StatusCode(StatusCodes.Status200OK, new ResponseClient("Registro deletado com sucesso"));
     }
 
-    
+    [HttpGet("all")]
+    public ActionResult<ResponseClient> GetAll()
+    {
+        List<SupervisoryRegistry> registries = RegistryManager.GetRegistries();
+        ResponseClient response = new ResponseClient(
+            HttpStatusCode.OK,
+            true,
+            registries,
+            $"Busca recuperada (Quantidade de documentos: {registries.Count})."
+        );
+        return StatusCode((int)HttpStatusCode.OK, response);
+    }
 }
