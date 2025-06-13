@@ -1,3 +1,4 @@
+using integra_dados.Repository;
 using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
@@ -6,9 +7,12 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        using (var scope = serviceProvider.CreateScope())
         {
-            using (var scope = serviceProvider.CreateScope())
+            var repository = scope.ServiceProvider.GetService<ISupervisoryRepository>();
+            RegistryManager.UpdateRegistries(repository.FindAll().Result);
+
+            while (!stoppingToken.IsCancellationRequested)
             {
                 var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
 
