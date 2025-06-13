@@ -35,6 +35,6 @@ RUN dotnet publish "integra_dados.csproj" -c Release -o publish --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
-EXPOSE 7001
+EXPOSE 80
 
 ENTRYPOINT [ "dotnet", "integra_dados.dll" ]
