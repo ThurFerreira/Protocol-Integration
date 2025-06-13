@@ -40,7 +40,8 @@ builder.Services.AddScoped<SupervisoryService>();
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(serverSettings.Port);
+    options.Listen(System.Net.IPAddress.Any, 7001);
+    // options.ListenAnyIP(serverSettings.Port);
 });
 
 builder.Services.AddCors(options =>
@@ -71,7 +72,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
+app.UseCors("AllowOtherApp");
 
 // app.UseHttpsRedirection();
 // app.UseStaticFiles();
