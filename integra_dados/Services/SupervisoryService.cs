@@ -102,6 +102,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         if (registry.TipoDado.Equals("discreteInput"))
         {
             var registerValue = GetSupervisoryDiscreteInputValue(registry);
+            Console.WriteLine("register registerValue: " + registerValue);
             registry.UpdateRegistry(registerValue);
             RegistryManager.ReplaceRegistry(registry);
             if (registry.ShouldSendToBroker(registerValue))
