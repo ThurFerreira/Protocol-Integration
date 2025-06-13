@@ -46,7 +46,7 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddControllers();
 
 // Background Services
-builder.Services.AddHostedService<SupervisoryScheduler>();
+// builder.Services.AddHostedService<SupervisoryScheduler>();
 
 // Adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -66,7 +66,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseRouting();
 
-// app.UseAuthorization();
+app.UseAuthorization();
 
 app.MapControllers();
 
