@@ -11,7 +11,7 @@ namespace integra_dados.Controllers;
 [Route("/supervisory/registry/")]
 public class SupervisoryController(SupervisoryService supervisoryService) : ControllerBase
 {
-    [HttpPost("create")]
+    [HttpPut("create")]
     public async Task<ActionResult<ResponseClient>> Create([FromBody] SupervisoryRegistry supervisory)
     {
         supervisory.SetIdSistema();
