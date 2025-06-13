@@ -91,11 +91,9 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
     public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry) {
         if (registry.FreqLeituraSeg > 0) {
             if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg)) {
-//                executorService.submit(() -> {
+                //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
-//                });
             } 
-            registry.IncrementCounter();
         }
     }
 
