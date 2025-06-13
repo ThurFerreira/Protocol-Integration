@@ -10,7 +10,7 @@ public class Registry
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string? _id { get; set; }
-
+    [JsonIgnore]
     public string? Uri { get; set; }
     public int Status { get; set; }
     [JsonIgnore]
