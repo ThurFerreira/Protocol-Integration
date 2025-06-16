@@ -8,16 +8,21 @@ using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
-public class SupervisoryService(ISupervisoryRepository supervisoryRepository, KafkaService kafkaService, ModbusApi modbusApi)
+public class SupervisoryService(
+    ISupervisoryRepository supervisoryRepository,
+    KafkaService kafkaService,
+    ModbusApi modbusApi)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
     {
-        if(registry.TopicoBroker == null || registry.TopicoBroker.Equals("")){
+        if (registry.TopicoBroker == null || registry.TopicoBroker.Equals(""))
+        {
             registry.TopicoBroker = registry.Nome;
         }
-        
-        if (supervisoryRepository.FindByName(registry.Nome) != null) {
+
+        if (supervisoryRepository.FindByName(registry.Nome) != null)
+        {
             var savedRegistry = await supervisoryRepository.Save(registry);
             RegistryManager.AddRegistry(savedRegistry);
             return new ResponseClient(
@@ -30,9 +35,9 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         return new ResponseClient(
             HttpStatusCode.Conflict,
             false, null,
-            "Registro de previsão com nome '"+ registry.Nome+"' já foi criado.");
+            "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
-    
+
     public ResponseClient Edit(SupervisoryRegistry supervisoryRegistry)
     {
         try
@@ -74,12 +79,13 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
             );
         }
     }
-    
-    public void Delete(string id) {
+
+    public void Delete(string id)
+    {
         supervisoryRepository.DeleteById(id);
         RegistryManager.DeleteRegisry(id);
     }
-    
+
     public void TriggerBroker(List<SupervisoryRegistry> registries)
     {
         foreach (SupervisoryRegistry supervisoryRegistry in registries.ToList())
@@ -88,37 +94,74 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         }
     }
 
-    public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry) {
-        if (int.Parse(registry.FreqLeituraSeg) > 0) {
-            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg))) {
+    public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry)
+    {
+        if (int.Parse(registry.FreqLeituraSeg) > 0)
+        {
+            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg)))
+            {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
-            } 
+            }
         }
     }
 
     private void MonitorSupervisory(SupervisoryRegistry registry)
     {
-        if (registry.TipoDado.Equals("discreteInput"))
+        switch (registry.TipoDado)
         {
-            var registerValue = GetSupervisoryDiscreteInputValue(registry);
-            Console.WriteLine("register registerValue: " + registerValue);
-            registry.UpdateRegistry(registerValue);
-            RegistryManager.ReplaceRegistry(registry);
-            if (registry.ShouldSendToBroker(registerValue))
-            {
-                if (registerValue != -1)
+            case "discreteInput":
+                var registerValueStatus = ModbusApi.ReadDiscreteInput(registry);
+                registry.UpdateRegistry(registerValueStatus);
+                RegistryManager.ReplaceRegistry(registry);
+                if (registry.ShouldSendToBroker(registerValueStatus))
                 {
-                    Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValue);
-                    kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    if (registerValueStatus != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueStatus);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
                 }
-            }
+                break;
+            case "inputRegister":
+                var registerValueIntRegister = ModbusApi.ReadInputRegister(registry);
+                registry.UpdateRegistry(registerValueIntRegister);
+                RegistryManager.ReplaceRegistry(registry);
+                if (registry.ShouldSendToBroker(registerValueIntRegister))
+                {
+                    if (registerValueIntRegister != -1)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueIntRegister);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
+                break;
+            case "coil":
+                var registerValueCoil = ModbusApi.ReadCoil(registry);
+                registry.UpdateRegistry(registerValueCoil);
+                RegistryManager.ReplaceRegistry(registry);
+                if (registry.ShouldSendToBroker(registerValueCoil))
+                {
+                    if (registerValueCoil != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueCoil);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
+                break;
+            case "holdingRegister":
+                var registerValueHolding = ModbusApi.ReadHoldingRegister(registry);
+                registry.UpdateRegistry(registerValueHolding);
+                RegistryManager.ReplaceRegistry(registry);
+                if (registry.ShouldSendToBroker(registerValueHolding))
+                {
+                    if (registerValueHolding != -1)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueHolding);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
+                break;
         }
-    }
-
-    private int GetSupervisoryDiscreteInputValue(SupervisoryRegistry registry)
-    {
-        var value = ModbusApi.ReadDiscreteInput(registry);
-        return value;
     }
 }

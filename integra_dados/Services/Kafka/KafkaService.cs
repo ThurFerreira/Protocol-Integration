@@ -35,6 +35,17 @@ public class KafkaService
             registry.UltimaAtualizacao.Millisecond
         );
     }
+    
+    public Event1000_1 CreateBrokerPackage(SupervisoryRegistry registry, bool reisterValue)
+    {
+        return new Event1000_1(
+            int.Parse(registry.IdSistema),
+            registry.Nome,
+            0,
+            reisterValue,
+            registry.UltimaAtualizacao.Millisecond
+        );
+    }
 
     public async void Publish(string topic, Event1000_1 pkg)
     {

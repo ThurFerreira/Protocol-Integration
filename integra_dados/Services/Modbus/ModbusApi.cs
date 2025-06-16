@@ -43,7 +43,36 @@ public class ModbusApi
         return false;
     }
 
-    public static int ReadDiscreteInput(SupervisoryRegistry registry)
+    public static bool ReadDiscreteInput(SupervisoryRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
+            try
+            {
+                var serverResponse = ApiClient.ReadDiscreteInputs(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return false;
+    }
+    
+    public static int ReadInputRegister(SupervisoryRegistry registry)
     {
         if (!ApiClient.Connected)
         {
@@ -54,6 +83,65 @@ public class ModbusApi
             try
             {
                 var serverResponse = ApiClient.ReadInputRegisters(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return -1;
+    }
+    
+    public static bool ReadCoil(SupervisoryRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
+            try
+            {
+                var serverResponse = ApiClient.ReadCoils(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return false;
+    }
+
+    public static int ReadHoldingRegister(SupervisoryRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        }
+
+        if (ApiClient.Connected)
+        {
+            try
+            {
+                var serverResponse = ApiClient.ReadHoldingRegisters(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua

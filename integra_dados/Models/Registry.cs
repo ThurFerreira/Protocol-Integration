@@ -63,6 +63,11 @@ public class Registry
             UpgradeStatusToAvailable();
         }
     }
+    
+    public void UpdateRegistry(bool onOffSwitchValue)
+    {
+        UpdateDate();
+    }
 
     private void UpdateDate()
     {

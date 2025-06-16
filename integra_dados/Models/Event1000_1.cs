@@ -21,4 +21,13 @@ public class Event1000_1
         ValorInt = valorInt;
         TimeStamping = timeStamping;
     }
+    
+    public Event1000_1(int idSistema, string nome, int token, bool valorBool, long timeStamping)
+    {
+        IdSistema = idSistema;
+        Nome = nome;
+        Token = token;
+        ValorBool = valorBool;
+        TimeStamping = timeStamping;
+    }
 }
