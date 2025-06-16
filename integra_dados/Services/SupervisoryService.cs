@@ -82,7 +82,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
     
     public void TriggerBroker(List<SupervisoryRegistry> registries)
     {
-        foreach (SupervisoryRegistry supervisoryRegistry in registries)
+        foreach (SupervisoryRegistry supervisoryRegistry in registries.ToList())
         {
             CheckWhetherShouldTriggerBroker(supervisoryRegistry);
         }
