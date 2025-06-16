@@ -10,6 +10,7 @@ public class Registry
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string? _id { get; set; }
+    public string? Id { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
     public int Status { get; set; }
@@ -33,6 +34,7 @@ public class Registry
     public void SetIdSistema()
     {
         IdSistema = Util.Util.GenerateRandomNumber().ToString();
+        Id = IdSistema;
     }
 
     public bool IsTimeToSendMessage(int freqLeitura)
