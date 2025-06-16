@@ -28,7 +28,7 @@ public class KafkaService
     public Event1000_1 CreateBrokerPackage(SupervisoryRegistry registry, int reisterValue)
     {
         return new Event1000_1(
-            registry.IdSistema,
+            int.Parse(registry.IdSistema),
             registry.Nome,
             0,
             reisterValue,

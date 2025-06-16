@@ -40,7 +40,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
             var supervisoryFound = supervisoryRepository.FindById(supervisoryRegistry.IdSistema);
             if (supervisoryFound != null)
             {
-                supervisoryRegistry.IdSistema = supervisoryFound.Id;
+                supervisoryRegistry.IdSistema = supervisoryFound.Id.ToString();
 
                 Task<SupervisoryRegistry> supervisoryEdited = supervisoryRepository.Save(supervisoryRegistry);
 
@@ -75,7 +75,7 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         }
     }
     
-    public void Delete(int idSistema) {
+    public void Delete(string? idSistema) {
         supervisoryRepository.DeleteByIdSistema(idSistema);
         RegistryManager.UpdateRegistries(supervisoryRepository.FindAll().Result);
     }
@@ -89,8 +89,8 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
     }
 
     public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry) {
-        if (registry.FreqLeituraSeg > 0) {
-            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg)) {
+        if (int.Parse(registry.FreqLeituraSeg) > 0) {
+            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg))) {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
             } 

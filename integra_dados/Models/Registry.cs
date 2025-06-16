@@ -14,7 +14,7 @@ public class Registry
     public string? Uri { get; set; }
     public int Status { get; set; }
     [JsonIgnore]
-    public int IdSistema { get; set; }
+    public string? IdSistema { get; set; }
     public string? Nome { get; set; }
     public string? Fonte { get; set; }
     public string? TipoDado { get; set; }
@@ -32,7 +32,7 @@ public class Registry
 
     public void SetIdSistema()
     {
-        IdSistema = Util.Util.GenerateRandomNumber();
+        IdSistema = Util.Util.GenerateRandomNumber().ToString();
     }
 
     public bool IsTimeToSendMessage(int freqLeitura)

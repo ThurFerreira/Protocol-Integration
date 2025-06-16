@@ -21,7 +21,7 @@ public class RegistryManager
     public static ResponseClient GetOne(int idSistema)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.IdSistema == idSistema);
+            .FirstOrDefault(registry => registry.IdSistema.Equals(idSistema));
 
         return CreateResponseToFoundRegistry(idSistema, foundRegistry);
     }

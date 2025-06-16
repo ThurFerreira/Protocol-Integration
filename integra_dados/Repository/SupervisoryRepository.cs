@@ -20,14 +20,14 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return document;
     }
 
-    public async Task<SupervisoryRegistry> FindById(int idSistema)
+    public async Task<SupervisoryRegistry> FindById(string? idSistema)
     {
         var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.IdSistema, idSistema);
         using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeleteByIdSistema(int idSistema)
+    public async Task<bool> DeleteByIdSistema(string? idSistema)
     {
         var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.IdSistema, idSistema);
         var result = await supervisoryRegistryCollection.DeleteOneAsync(filter);

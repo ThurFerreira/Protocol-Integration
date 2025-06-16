@@ -7,7 +7,7 @@ public interface ISupervisoryRepository
 {
     public Task<SupervisoryRegistry> FindByName(String name);
     public Task<SupervisoryRegistry> Save(SupervisoryRegistry document);
-    public Task<SupervisoryRegistry> FindById(int idSistema);
-    public Task<bool> DeleteByIdSistema(int idSistema);
+    public Task<SupervisoryRegistry> FindById(string? idSistema);
+    public Task<bool> DeleteByIdSistema(string idSistema);
     public Task<List<SupervisoryRegistry>> FindAll();
 }

@@ -15,7 +15,7 @@ public class ModbusApi
     public static bool ConnectClientModbus(SupervisoryRegistry registry)
     {
         ApiClient.IPAddress = registry.Ip;
-        ApiClient.Port = registry.Porta;
+        ApiClient.Port = int.Parse(registry.Porta);
         ApiClient.SerialPort = null;
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -53,7 +53,7 @@ public class ModbusApi
         if(ApiClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                var serverResponse = ApiClient.ReadInputRegisters(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
