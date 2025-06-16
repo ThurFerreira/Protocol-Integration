@@ -75,9 +75,9 @@ public class SupervisoryService(ISupervisoryRepository supervisoryRepository, Ka
         }
     }
     
-    public void Delete(string? idSistema) {
-        supervisoryRepository.DeleteByIdSistema(idSistema);
-        RegistryManager.UpdateRegistries(supervisoryRepository.FindAll().Result);
+    public void Delete(string id) {
+        supervisoryRepository.DeleteById(id);
+        RegistryManager.DeleteRegisry(id);
     }
     
     public void TriggerBroker(List<SupervisoryRegistry> registries)

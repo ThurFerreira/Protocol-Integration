@@ -6,24 +6,24 @@ namespace integra_dados.Util.Registries;
 
 public class RegistryManager
 {
-    private static List<SupervisoryRegistry> registries = new List<SupervisoryRegistry>();
+    private static Dictionary<string, SupervisoryRegistry> registries = new Dictionary<string, SupervisoryRegistry>();
 
     public static void AddRegistry(SupervisoryRegistry supervisoryRegistry)
     {
-        registries.Add(supervisoryRegistry);
+        registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
     }
 
     public static List<SupervisoryRegistry> GetRegistries()
     {
-        return registries;
+        return registries.Values.ToList();
     }
 
     public static ResponseClient GetOne(int idSistema)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.IdSistema.Equals(idSistema));
+            .FirstOrDefault(registry => registry.Value.IdSistema.Equals(idSistema));
 
-        return CreateResponseToFoundRegistry(idSistema, foundRegistry);
+        return CreateResponseToFoundRegistry(idSistema, foundRegistry.Value);
     }
 
     private static ResponseClient CreateResponseToFoundRegistry(int idSistema, SupervisoryRegistry? foundRegistry)
@@ -50,19 +50,26 @@ public class RegistryManager
 
     public static void ReplaceRegistry(SupervisoryRegistry supervisoryEdited)
     {
-        for (int i = 0; i < registries.Count; i++)
+        foreach (var registry in registries.Values.ToList())
         {
-            if (registries[i].IdSistema == supervisoryEdited.IdSistema)
+            if (registry.IdSistema.Equals(supervisoryEdited.IdSistema))
             {
-                registries[i] = supervisoryEdited;
-                break;
+                registries[registry.IdSistema] = supervisoryEdited;
             }
         }
     }
 
-    public static void UpdateRegistries(List<SupervisoryRegistry> updateRegistries)
+    public static void StartRegistries(List<SupervisoryRegistry> updateRegistries)
     {
-        registries = updateRegistries;
+        foreach (var supervisoryRegistry in updateRegistries)
+        {
+            registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
+        }
+    }
+
+    public static void DeleteRegisry(string id)
+    {
+        registries.Remove(id);
     }
     
 }

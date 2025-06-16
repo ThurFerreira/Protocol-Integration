@@ -15,7 +15,7 @@ public class ModbusApi
     public static bool ConnectClientModbus(SupervisoryRegistry registry)
     {
         ApiClient.IPAddress = registry.Ip;
-        ApiClient.Port = int.Parse(registry.Porta);
+        ApiClient.Port = int.Parse(registry.Porta!);
         ApiClient.SerialPort = null;
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();

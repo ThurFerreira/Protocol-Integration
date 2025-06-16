@@ -12,7 +12,7 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
         {
             var repository = initialScope.ServiceProvider.GetRequiredService<ISupervisoryRepository>();
             var allRegistries = await repository.FindAll();
-            RegistryManager.UpdateRegistries(allRegistries);
+            RegistryManager.StartRegistries(allRegistries);
         }
 
         // Loop principal do serviço

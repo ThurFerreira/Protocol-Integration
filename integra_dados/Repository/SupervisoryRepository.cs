@@ -27,9 +27,9 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeleteByIdSistema(string? idSistema)
+    public async Task<bool> DeleteById(string id)
     {
-        var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.IdSistema, idSistema);
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.IdSistema, id);
         var result = await supervisoryRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }

@@ -53,9 +53,9 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
     }
     
     [HttpDelete("delete")]
-    public IActionResult DeleteSupervisoryRegistry([FromQuery] string idSistema)
+    public IActionResult DeleteSupervisoryRegistry([FromQuery] string id)
     {
-        supervisoryService.Delete(idSistema);
+        supervisoryService.Delete(id);
         return StatusCode(StatusCodes.Status200OK, new ResponseClient("Registro deletado com sucesso"));
     }
 
