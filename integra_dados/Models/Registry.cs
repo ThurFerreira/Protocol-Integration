@@ -21,7 +21,7 @@ public class Registry
     public string? TipoDado { get; set; }
     public string? DescricaoPontoGeografico { get; set; }
     public string? Observacao { get; set; }
-    public long UltimaAtualizacao { get; set; }
+    public DateTime UltimaAtualizacao { get; set; }
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
 
@@ -71,7 +71,7 @@ public class Registry
 
     private void UpdateDate()
     {
-        UltimaAtualizacao = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        UltimaAtualizacao = DateTime.Now;
     }
 
     public void UpgradeStatusToAvailable()
