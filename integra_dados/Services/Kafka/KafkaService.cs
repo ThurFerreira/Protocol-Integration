@@ -32,7 +32,7 @@ public class KafkaService
             registry.Nome,
             0,
             reisterValue,
-            registry.UltimaAtualizacao.Millisecond
+            registry.UltimaAtualizacao
         );
     }
     
@@ -43,7 +43,7 @@ public class KafkaService
             registry.Nome,
             0,
             reisterValue,
-            registry.UltimaAtualizacao.Millisecond
+            registry.UltimaAtualizacao
         );
     }
 

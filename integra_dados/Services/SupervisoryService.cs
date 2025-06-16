@@ -10,8 +10,7 @@ namespace integra_dados.Services;
 
 public class SupervisoryService(
     ISupervisoryRepository supervisoryRepository,
-    KafkaService kafkaService,
-    ModbusApi modbusApi)
+    KafkaService kafkaService)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
