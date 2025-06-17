@@ -14,7 +14,12 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<SupervisoryRegistry> Save(SupervisoryRegistry document)
+    Task<SupervisoryRegistry> IRepository<SupervisoryRegistry>.Save(SupervisoryRegistry document)
+    {
+        return Save(document);
+    }
+
+    async Task<SupervisoryRegistry> Save(SupervisoryRegistry document)
     {
         await supervisoryRegistryCollection.InsertOneAsync(document);
         return document;
@@ -38,5 +43,10 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
     {
         var result = await supervisoryRegistryCollection.FindAsync(FilterDefinition<SupervisoryRegistry>.Empty);
         return await result.ToListAsync();
+    }
+
+    public Task<SupervisoryRegistry> FindByNameAndVarType(string name, string varType)
+    {
+        throw new NotImplementedException();
     }
 }

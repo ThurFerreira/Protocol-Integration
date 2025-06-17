@@ -3,7 +3,6 @@ namespace integra_dados.Models;
 [BsonCollection("SupervisoryRegistry")]
 public class SupervisoryRegistry : Registry
 {
-    public string? FreqLeituraSeg { get; set; } //TODO int
     public string? Protocolo { get; set; }
 
     // Dados de monitoramento do supervisório

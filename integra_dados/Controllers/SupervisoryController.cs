@@ -21,27 +21,12 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
         return StatusCode((int) responseFromRegistry.ResponseStatus, responseFromRegistry);
     }
     
-    [HttpGet("variable/{id}/all")]
-    public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
-    {
-        List<SupervisoryRegistry> registries = RegistryManager.GetRegistries();
-
-        var responseClient = new ResponseClient(
-            HttpStatusCode.OK,
-            true,
-            registries,
-            $"Busca recuperada (Quantidade de documentos: {registries.Count})."
-        );
-
-        return StatusCode((int)responseClient.ResponseStatus, responseClient);
-    }
-    
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ResponseClient), (int)HttpStatusCode.OK)]
     [Produces("application/json")]
     public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int idSistema)
     {
-        var responseClient = RegistryManager.GetOne(idSistema);
+        var responseClient = SupervisoryService.GetOne(idSistema);
         return StatusCode((int)responseClient.ResponseStatus, responseClient);
     }
     
@@ -62,7 +47,7 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<SupervisoryRegistry> registries = RegistryManager.GetRegistries();
+        List<SupervisoryRegistry> registries = SupervisoryService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
@@ -70,5 +55,21 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
             $"Busca recuperada (Quantidade de documentos: {registries.Count})."
         );
         return StatusCode((int)HttpStatusCode.OK, response);
+    }
+    
+        
+    [HttpGet("variable/{id}/all")]
+    public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
+    {
+        List<SupervisoryRegistry> registries = SupervisoryService.GetRegistries();
+
+        var responseClient = new ResponseClient(
+            HttpStatusCode.OK,
+            true,
+            registries,
+            $"Busca recuperada (Quantidade de documentos: {registries.Count})."
+        );
+
+        return StatusCode((int)responseClient.ResponseStatus, responseClient);
     }
 }

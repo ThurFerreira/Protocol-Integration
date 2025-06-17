@@ -9,9 +9,16 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Inicializa o RegistryManager uma vez no início
-        using (var initialScope = serviceProvider.CreateScope())
+        using (var supervisoryScope = serviceProvider.CreateScope())
         {
-            var repository = initialScope.ServiceProvider.GetRequiredService<IRepository<SupervisoryRegistry>>();
+            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<SupervisoryRegistry>>();
+            var allRegistries = await repository.FindAll();
+            RegistryManager.StartRegistries(allRegistries);
+        }
+        
+        using (var forecastScope = serviceProvider.CreateScope())
+        {
+            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
             var allRegistries = await repository.FindAll();
             RegistryManager.StartRegistries(allRegistries);
         }
