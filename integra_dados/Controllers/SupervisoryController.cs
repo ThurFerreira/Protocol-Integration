@@ -21,7 +21,7 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
         return StatusCode((int) responseFromRegistry.ResponseStatus, responseFromRegistry);
     }
     
-    [HttpGet("all-for-variable")]
+    [HttpGet("variable/{id}/all")]
     public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
     {
         List<SupervisoryRegistry> registries = RegistryManager.GetRegistries();
@@ -36,24 +36,24 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
         return StatusCode((int)responseClient.ResponseStatus, responseClient);
     }
     
-    [HttpGet("find-one")]
+    [HttpGet("{id}")]
     [ProducesResponseType(typeof(ResponseClient), (int)HttpStatusCode.OK)]
     [Produces("application/json")]
-    public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromQuery] int idSistema)
+    public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int idSistema)
     {
         var responseClient = RegistryManager.GetOne(idSistema);
         return StatusCode((int)responseClient.ResponseStatus, responseClient);
     }
     
-    [HttpGet("edit")]
-    public IActionResult EditSupervisory([FromQuery] SupervisoryRegistry supervisory)
+    [HttpPut("edit")]
+    public IActionResult EditSupervisory([FromBody] SupervisoryRegistry supervisory)
     {
         var responseFromEdition = supervisoryService.Edit(supervisory);
         return StatusCode((int)responseFromEdition.ResponseStatus, responseFromEdition);
     }
     
-    [HttpDelete("delete")]
-    public IActionResult DeleteSupervisoryRegistry([FromQuery] string id)
+    [HttpDelete("delete/{id}")]
+    public IActionResult DeleteSupervisoryRegistry([FromRoute] string id)
     {
         supervisoryService.Delete(id);
         return StatusCode(StatusCodes.Status200OK, new ResponseClient("Registro deletado com sucesso"));
