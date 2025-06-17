@@ -13,14 +13,14 @@ Este microsserviço fornece uma API para gerenciamento de previsões meteorológ
     - Model (`ForecastRegistry`, `Location`, `ResponseClient`)
 
 ## 🚀 Endpoints
-
-| Método     | Endpoint                       | Descrição                                            | Status de Resposta                                           |
-| ---------- | ------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------ |
-| **GET**    | `/forecast-on-location`        | Busca previsões para uma localização (lat, lng)      | 200 ✅ Sucesso<br>500 ❌ Erro interno                          |
-| **GET**    | `/all-registries-for-variable` | Lista todos os registros para a variável configurada | 200 ✅ Sucesso<br>404 ⚠️ Não encontrado<br>500 ❌ Erro interno |
-| **PUT**    | `/create`                      | Cria um novo registro de previsão                    | 200 ✅ Criado<br>409 ⚠️ Já existe<br>500 ❌ Erro interno       |
-| **POST**   | `/edit`                        | Edita um registro existente de previsão              | 200 ✅ Editado<br>500 ❌ Erro interno                          |
-| **DELETE** | `/delete?idSistema={id}`       | Deleta um registro pelo `idSistema`                  | 200 ✅ Deletado                                               |
+  # Route /forecast/
+| Método     | Endpoint           | Descrição                                              | Status de Resposta                                           |
+|------------|--------------------|--------------------------------------------------------| ------------------------------------------------------------ |
+| **GET**    | `/location`        | Busca previsões para uma localização (lat, lng)        | 200 ✅ Sucesso<br>500 ❌ Erro interno                          |
+| **POST**   | `/create`          | Cria um novo registro de previsão                      | 200 ✅ Criado<br>409 ⚠️ Já existe<br>500 ❌ Erro interno       |
+| **PUT**    | `/edit`            | Edita um registro existente de previsão                | 200 ✅ Editado<br>500 ❌ Erro interno                          |
+| **DELETE** | `/delete?id={id}`  | Deleta um registro pelo `id`                           | 200 ✅ Deletado                                               |
+| **GET**    | `/registries/{name}` | Retorna todos os registros associados à variabel `name` | 200 ✅ Deletado                                               |
 
 ## 🔄 Envio periódico ao Broker
 
@@ -28,24 +28,14 @@ Este microsserviço fornece uma API para gerenciamento de previsões meteorológ
 - Função: sendForecastInformationToBroker()
 - Envia as informações atualizadas dos registros (UpdatedForecastRegistries) para o broker de mensagens.
 
-## ⚙️ Dependências principais
-
-- spring-boot-starter-web
-- spring-boot-starter-scheduling
-- springdoc-openapi (Swagger)
-- lombok
 
 ## 🗺️ Modelos principais
-
 ### ForecastRegistry
 - Representa um registro de previsão.
-
 ### Location
 - Contém latitude e longitude.
-
 ### ResponseClient
 - Retorno padrão da API, com mensagens e status HTTP.
-
 ## 📑 Observações
 
 - Este controller é uma classe abstrata, devendo ser estendida para cada variável específica de previsão (ex.: temperatura, umidade, etc.).
@@ -66,13 +56,14 @@ Este microsserviço fornece uma API para gerenciamento de registros de supervis�
     - Model (`SupervisoryRegistry`, `ResponseClient`)
 
 ## 🚀 Endpoints
-| Método     | Endpoint                       | Descrição                                            | Status de Resposta                                           |
-| ---------- | ------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------ |
-| **GET**    | `/forecast-on-location`        | Busca previsões para uma localização (lat, lng)      | 200 ✅ Sucesso<br>500 ❌ Erro interno                          |
-| **GET**    | `/all-registries-for-variable` | Lista todos os registros para a variável configurada | 200 ✅ Sucesso<br>404 ⚠️ Não encontrado<br>500 ❌ Erro interno |
-| **PUT**    | `/create`                      | Cria um novo registro de previsão                    | 200 ✅ Criado<br>409 ⚠️ Já existe<br>500 ❌ Erro interno       |
-| **POST**   | `/edit`                        | Edita um registro existente de previsão              | 200 ✅ Editado<br>500 ❌ Erro interno                          |
-| **DELETE** | `/delete?idSistema={id}`       | Deleta um registro pelo `idSistema`                  | 200 ✅ Deletado                                               |
+| Método     | Endpoint               | Descrição                                                 | Status de Resposta                                           |
+|------------|------------------------|-----------------------------------------------------------| ------------------------------------------------------------ |
+| **GET**    | `/{id}`                | Busca previsões para uma localização (lat, lng)           | 200 ✅ Sucesso<br>500 ❌ Erro interno                          |
+| **GET**    | `/variable/{id}/all  ` | Lista todos os registros para a variável `id` configurada | 200 ✅ Sucesso<br>404 ⚠️ Não encontrado<br>500 ❌ Erro interno |
+| **POST**   | `/create`              | Cria um novo registro de previsão                         | 200 ✅ Criado<br>409 ⚠️ Já existe<br>500 ❌ Erro interno       |
+| **POST**   | `/edit`                | Edita um registro existente de previsão                   | 200 ✅ Editado<br>500 ❌ Erro interno                          |
+| **DELETE** | `/delete?id={id}`      | Deleta um registro pelo `id`                              | 200 ✅ Deletado                                               |
+| **GET**    | `/all`                 | Retorna todos os registros ativos                         | 200 ✅ Deletado                                               |
 
 ## 🔄 Envio periódico ao Broker
 
@@ -84,11 +75,9 @@ Este microsserviço fornece uma API para gerenciamento de registros de supervis�
 
 ### SupervisoryRegistry
 - Representa um registro de supervisão.
-
 ### ResponseClient
 - Retorno padrão da API, com mensagens e status HTTP.
 
 ## 📑 Observações
-
 - Este controller não é abstrato, está pronto para uso direto.
 - O método de envio ao broker é executado automaticamente, sem necessidade de chamada externa.
