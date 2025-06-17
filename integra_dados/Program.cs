@@ -55,6 +55,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
+// Generic Data Service
+builder.Services.AddSingleton<GenericDataService>();
+
 // Background Services
 builder.Services.AddHostedService<SupervisoryScheduler>();
 
