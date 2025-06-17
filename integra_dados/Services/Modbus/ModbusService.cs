@@ -3,11 +3,11 @@ using integra_dados.Models;
 
 namespace integra_dados.Services.Modbus;
 
-public class ModbusApi
+public class ModbusService
 {
     public static ModbusClient? ApiClient;
 
-    public ModbusApi()
+    public ModbusService()
     {
         ApiClient = new ModbusClient();
     }

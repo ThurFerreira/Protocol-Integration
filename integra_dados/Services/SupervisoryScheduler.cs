@@ -1,3 +1,4 @@
+using integra_dados.Models;
 using integra_dados.Repository;
 using integra_dados.Util.Registries;
 
@@ -10,7 +11,7 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
         // Inicializa o RegistryManager uma vez no início
         using (var initialScope = serviceProvider.CreateScope())
         {
-            var repository = initialScope.ServiceProvider.GetRequiredService<ISupervisoryRepository>();
+            var repository = initialScope.ServiceProvider.GetRequiredService<IRepository<SupervisoryRegistry>>();
             var allRegistries = await repository.FindAll();
             RegistryManager.StartRegistries(allRegistries);
         }

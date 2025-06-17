@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace integra_dados.Repository;
 
-public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : ISupervisoryRepository
+public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : IRepository<SupervisoryRegistry>
 {
 
     public async Task<SupervisoryRegistry> FindByName(string name)

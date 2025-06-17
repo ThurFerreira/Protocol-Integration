@@ -9,9 +9,9 @@ using integra_dados.Util.Registries;
 namespace integra_dados.Services;
 
 public class SupervisoryService(
-    ISupervisoryRepository supervisoryRepository,
+    IRepository<SupervisoryRegistry> supervisoryRepository,
     KafkaService kafkaService,
-    ModbusApi modbusApi)
+    ModbusService modbusService)
 {
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
@@ -111,7 +111,7 @@ public class SupervisoryService(
         switch (registry.TipoDado)
         {
             case "discreteInput":
-                var registerValueStatus = ModbusApi.ReadDiscreteInput(registry);
+                var registerValueStatus = ModbusService.ReadDiscreteInput(registry);
                 registry.UpdateRegistry(registerValueStatus);
                 RegistryManager.ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueStatus))
@@ -124,7 +124,7 @@ public class SupervisoryService(
                 }
                 break;
             case "inputRegister":
-                var registerValueIntRegister = ModbusApi.ReadInputRegister(registry);
+                var registerValueIntRegister = ModbusService.ReadInputRegister(registry);
                 registry.UpdateRegistry(registerValueIntRegister);
                 RegistryManager.ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueIntRegister))
@@ -137,7 +137,7 @@ public class SupervisoryService(
                 }
                 break;
             case "coil":
-                var registerValueCoil = ModbusApi.ReadCoil(registry);
+                var registerValueCoil = ModbusService.ReadCoil(registry);
                 registry.UpdateRegistry(registerValueCoil);
                 RegistryManager.ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueCoil))
@@ -150,7 +150,7 @@ public class SupervisoryService(
                 }
                 break;
             case "holdingRegister":
-                var registerValueHolding = ModbusApi.ReadHoldingRegister(registry);
+                var registerValueHolding = ModbusService.ReadHoldingRegister(registry);
                 registry.UpdateRegistry(registerValueHolding);
                 RegistryManager.ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueHolding))
