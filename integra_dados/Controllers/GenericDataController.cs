@@ -7,7 +7,7 @@ namespace integra_dados.Controllers;
 [Route("/generic-data/")]
 public class GenericDataController(GenericDataService dataService) : ControllerBase
 {
-    [HttpGet("create")]
+    [HttpGet("all")]
     public IActionResult Create()
     {
         List<object> list = dataService.GetSupervisoryAndForecastData();
