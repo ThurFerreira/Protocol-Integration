@@ -80,4 +80,8 @@
       <PackageReference Include="System.IO.Ports" Version="10.0.0-preview.5.25277.114" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Util\Registries\" />
+    </ItemGroup>
+
 </Project>

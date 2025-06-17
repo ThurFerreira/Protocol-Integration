@@ -24,6 +24,8 @@ public class Registry
     public DateTime UltimaAtualizacao { get; set; }
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
+    public string? FreqLeituraSeg { get; set; } //TODO int
+    
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
     public long LastRead { get; set; } = 0;

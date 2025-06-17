@@ -10,4 +10,5 @@ public interface IRepository<T>
     public Task<T> FindById(string? idSistema);
     public Task<bool> DeleteById(string id);
     public Task<List<T>> FindAll();
+    public Task<T> FindByNameAndVarType(string name, string varType);
 }
