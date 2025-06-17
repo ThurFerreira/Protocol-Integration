@@ -1,32 +1,30 @@
+using System.Net;
 using integra_dados.Models;
+using integra_dados.Models.Response;
+using integra_dados.Services;
+using integra_dados.Util.Registries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
 
 [ApiController]
 [Route("/forecast/")]
-public class ForecastController : ControllerBase
+public class ForecastController(ForecastService forecastService) : ControllerBase
 {
     [HttpPost("create")]
     public IActionResult Create([FromBody] ForecastRegistry forecast)
     {
-        // var reponseClient = this.weatherService.createForecast(
-        //     forecastRegistry,
-        //     this.getForecastVariableName()
-        // );
-        // return ResponseEntity.status(reponseClient.getResponseStatus()).body(reponseClient);
+        var responseClient = forecastService.Create(forecast);
         return StatusCode(201);
     }
 
     [HttpPut("update")]
-    public IActionResult Update([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult<ResponseClient>> Update([FromBody] ForecastRegistry forecast)
     {
-        // var reponseClient = this.weatherService.editForecast(
-        //     forecastRegistry,
-        //     this.getForecastVariableName()
-        // );
-        // return ResponseEntity.status(reponseClient.getResponseStatus()).body(reponseClient);
-        return StatusCode(201);
+        forecast.SetIdSistema();
+        var responseFromRegistry = await ForecastService.Create(forecast);
+        
+        return StatusCode(200, responseClient);
     }
 
     [HttpDelete("delete/{id}")]
@@ -44,7 +42,8 @@ public class ForecastController : ControllerBase
         return StatusCode(201);
     }
 
-    [HttpPost("registries/{name}")]
+
+    [HttpGet("registries/{name}")]
     public IActionResult GetAllForecastsForVariable([FromRoute] string name)
     {
         // return this.weatherService.getAllForecastForVariable(this.getForecastVariableName());
