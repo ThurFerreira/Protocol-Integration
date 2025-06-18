@@ -63,6 +63,8 @@ public class ForecastService(
         ForecastRegistry forecastFound = await forecastRepository.ReplaceOne(forecastRegistry);
         if (forecastFound != null)
         {
+            ReplaceRegistry(forecastFound);
+
             return new ResponseClient(
                 HttpStatusCode.OK,
                 true, forecastFound,
@@ -90,17 +92,24 @@ public class ForecastService(
                 "Registro de previsão deletado com sucesso."
             );
         }
-        
+
         return new ResponseClient(
             HttpStatusCode.Conflict,
             false,
             "Registro de previsão com id '" + id + "' não foi encontrado."
         );
     }
-    
-    public void GetForecast(long lat, long lng, string varType)
+
+    public async Task<ResponseClient> GetAllForecastForVariable(string name)
     {
-        windyService.GetWindyForecast(lat, lng, varType);
+        List<ForecastRegistry> response = await forecastRepository.FindByName(name);
+        return new ResponseClient(HttpStatusCode.OK, true, response, "Busca realizada com sucesso");
+    }
+
+    public async Task<ResponseClient> GetLocationForecast(double lat, double lng, string varType)
+    {
+        WindyResponse response = await windyService.GetWindyForecast(lat, lng, varType);
+        return new ResponseClient(HttpStatusCode.OK, true, response, "Busca realizada com sucesso");
     }
 
 
@@ -109,7 +118,7 @@ public class ForecastService(
         registries.Add(registry.Id, registry);
     }
 
-    List<ForecastRegistry> GetRegistries()
+    public static List<ForecastRegistry> GetRegistries()
     {
         return registries.Values.ToList();
     }
@@ -155,7 +164,7 @@ public class ForecastService(
         }
     }
 
-    public void StartRegistries(List<ForecastRegistry> updateRegistries)
+    public static void StartRegistries(List<ForecastRegistry> updateRegistries)
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {
@@ -166,5 +175,59 @@ public class ForecastService(
     void DeleteRegisry(string id)
     {
         registries.Remove(id);
+    }
+
+    public void TriggerBroker(List<ForecastRegistry> registries)
+    {
+        foreach (ForecastRegistry forecastRegistry in registries.ToList())
+        {
+            CheckWhetherShouldTriggerBroker(forecastRegistry);
+        }
+    }
+
+    public void CheckWhetherShouldTriggerBroker(ForecastRegistry registry)
+    {
+        if (int.Parse(registry.FreqLeituraSeg) > 0)
+        {
+            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg)))
+            {
+                //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
+                MonitorSupervisory(registry);
+            }
+        }
+    }
+
+    private void MonitorSupervisory(ForecastRegistry registry)
+    {
+        switch (registry.Nome)
+        {
+            case "temp":
+                // var registerValueStatus = ModbusService.ReadDiscreteInput(registry);
+                // registry.UpdateRegistry(registerValueStatus);
+                // ReplaceRegistry(registry);
+                // if (registry.ShouldSendToBroker(registerValueStatus))
+                // {
+                //     if (registerValueStatus != null)
+                //     {
+                //         Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueStatus);
+                //         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                //     }
+                // }
+                var response = windyService.
+
+                break;
+            case "convPrecip":
+                break;
+            case "wind":
+                break;
+            case "cape":
+                break;
+            case "rh":
+                break;
+            case "lclouds":
+                break;
+            case "hclouds":
+                break;
+        }
     }
 }

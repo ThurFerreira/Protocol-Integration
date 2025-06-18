@@ -20,9 +20,9 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     }
 
     [HttpPut("edit")]
-    public async Task<ActionResult<ResponseClient>> Update([FromBody] ForecastRegistry forecast)
+    public ActionResult Update([FromBody] ForecastRegistry forecast)
     {
-        ResponseClient response = await forecastService.Edit(forecast);
+        ResponseClient response = forecastService.Edit(forecast).Result;
         return StatusCode(200, response);
     }
     
@@ -34,17 +34,17 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     }
     
     [HttpGet("location")]
-    public IActionResult GetForecastOnPoint(long lat, long lng, string varType)
+    public async Task<ActionResult> GetForecastOnLocation(double lat, double lng, string varType)
     {
-        forecastService.GetForecast(lat, lng, varType);
-        return StatusCode(201);
+        ResponseClient response = await forecastService.GetLocationForecast(lat, lng, varType);
+        return StatusCode(200, response);
     }
 
 
-    [HttpGet("registries/{name}")]
-    public IActionResult GetAllForecastsForVariable([FromRoute] string name)
+    [HttpGet("registries/{varType}")]
+    public async Task<ActionResult> GetAllForecastsForVariable([FromRoute] string varType)
     {
-        // return this.weatherService.getAllForecastForVariable(this.getForecastVariableName());
-        return StatusCode(201);
+        ResponseClient response = await forecastService.GetAllForecastForVariable(varType);
+        return StatusCode(200, response);
     }
 }

@@ -6,14 +6,24 @@ namespace integra_dados.Repository;
 
 public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegistryCollection) : IRepository<ForecastRegistry>
 {
-    public Task<ForecastRegistry> FindByName(string name)
+    public async Task<ForecastRegistry> FindOneByName(string name)
     {
-        throw new NotImplementedException();
+        var filter = Builders<ForecastRegistry>.Filter.Eq(s => s.Nome, name);
+        using var cursor = await forecastRegistryCollection.FindAsync(filter);
+        return cursor.FirstOrDefault();
+    }
+    
+    public async Task<List<ForecastRegistry>> FindByName(string name)
+    {
+        var filter = Builders<ForecastRegistry>.Filter.Eq(s => s.Nome, name);
+        using var cursor = await forecastRegistryCollection.FindAsync(filter);
+        return cursor.ToList();
     }
 
-    public Task<ForecastRegistry> Save(ForecastRegistry document)
+    public async Task<ForecastRegistry> Save(ForecastRegistry document)
     {
-        throw new NotImplementedException();
+        await forecastRegistryCollection.InsertOneAsync(document);
+        return document;
     }
 
     public Task<ForecastRegistry> FindById(string? idSistema)
