@@ -11,4 +11,5 @@ public interface IRepository<T>
     public Task<bool> DeleteById(string id);
     public Task<List<T>> FindAll();
     public Task<T> FindByNameAndVarType(string name, string varType);
+    public Task<T> ReplaceOne(T document);
 }

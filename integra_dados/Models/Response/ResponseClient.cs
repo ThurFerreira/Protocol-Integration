@@ -17,10 +17,23 @@ public class ResponseClient
         ResponseMessage = responseMessage;
     }
     
+    public ResponseClient(HttpStatusCode responseStatus, bool wasSuccessful, string responseMessage)
+    {
+        ResponseStatus = responseStatus;
+        WasSuccessful = wasSuccessful;
+        Response = null;
+        ResponseMessage = responseMessage;
+    }
+    
     public ResponseClient (String responseMessage) {
         ResponseStatus = HttpStatusCode.OK;
         WasSuccessful = true;
         Response = null;
         ResponseMessage = responseMessage;
+    }
+    
+
+    public ResponseClient()
+    {
     }
 }
