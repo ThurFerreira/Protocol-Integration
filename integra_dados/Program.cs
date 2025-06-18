@@ -79,13 +79,13 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 // }
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var svc = scope.ServiceProvider.GetRequiredService<WindyApiService>();
-
-    svc.GetWindyForecast(-25.144548639707363, -50.17815056912481, "temp");
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     using var scope = app.Services.CreateScope();
+//     var svc = scope.ServiceProvider.GetRequiredService<WindyApiService>();
+//
+//     svc.GetWindyForecast(-25.144548639707363, -50.17815056912481, "temp");
+// }
 
 app.UseCors("AllowOtherApp");
 
