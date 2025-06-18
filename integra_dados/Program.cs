@@ -9,8 +9,8 @@ using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+// Http Client
+builder.Services.AddHttpClient<HttpService>();
 
 // Modbus
 builder.Services.AddSingleton<ModbusService>();
@@ -29,7 +29,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     var settings = sp.GetRequiredService<IOptions<MongoDbConfig>>().Value;
     if (string.IsNullOrEmpty(settings.ConnectionString))
         throw new ArgumentException("MongoDB ConnectionString is null or empty.");
-    
+
     return new MongoClient(settings.ConnectionString);
 });
 
@@ -44,18 +44,15 @@ builder.Services.AddScoped<ForecastService>();
 
 // Http server config
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(serverSettings.Port);
-});
+builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(serverSettings.Port); });
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowOtherApp", policy =>
     {
-        policy.AllowAnyOrigin()     // Permite qualquer origem
-            .AllowAnyMethod()     // Permite qualquer método HTTP
-            .AllowAnyHeader();    // Permite qualquer header
+        policy.AllowAnyOrigin() // Permite qualquer origem
+            .AllowAnyMethod() // Permite qualquer método HTTP
+            .AllowAnyHeader(); // Permite qualquer header
     });
 });
 
@@ -71,14 +68,24 @@ builder.Services.AddHostedService<SupervisoryScheduler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Windy Service
+builder.Services.AddSingleton<WindyApiService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 // }
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var svc = scope.ServiceProvider.GetRequiredService<WindyApiService>();
+
+    svc.GetWindyForecast(-25.144548639707363, -50.17815056912481, "temp");
+}
 
 app.UseCors("AllowOtherApp");
 
