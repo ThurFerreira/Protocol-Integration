@@ -2,7 +2,6 @@ using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Services;
-using integra_dados.Util.Registries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;

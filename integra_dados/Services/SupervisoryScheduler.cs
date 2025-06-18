@@ -1,6 +1,5 @@
 using integra_dados.Models;
 using integra_dados.Repository;
-using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
@@ -13,15 +12,15 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
         {
             var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<SupervisoryRegistry>>();
             var allRegistries = await repository.FindAll();
-            RegistryManager.StartRegistries(allRegistries);
+            SupervisoryService.StartRegistries(allRegistries);
         }
         
-        using (var forecastScope = serviceProvider.CreateScope())
-        {
-            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
-            var allRegistries = await repository.FindAll();
-            RegistryManager.StartRegistries(allRegistries);
-        }
+        // using (var forecastScope = serviceProvider.CreateScope())
+        // {
+        //     var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
+        //     var allRegistries = await repository.FindAll();
+        //     ForecastService.StartRegistries(allRegistries);
+        // }
 
         // Loop principal do serviço
         while (!stoppingToken.IsCancellationRequested)
@@ -31,7 +30,7 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
                 using (var scope = serviceProvider.CreateScope())
                 {
                     var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
-                    supervisoryService.TriggerBroker(RegistryManager.GetRegistries());
+                    supervisoryService.TriggerBroker(SupervisoryService.GetRegistries());
                 }
             }
             catch (Exception ex)

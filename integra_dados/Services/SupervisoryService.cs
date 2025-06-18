@@ -4,7 +4,6 @@ using integra_dados.Models.Response;
 using integra_dados.Repository;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
-using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
@@ -82,17 +81,32 @@ public class SupervisoryService(
         }
     }
 
-    public void Delete(string id)
+    public async Task<ResponseClient> Delete(string id)
     {
-        supervisoryRepository.DeleteById(id);
-        DeleteRegisry(id);
+        bool deleted = await supervisoryRepository.DeleteById(id);
+
+        if (deleted)
+        {
+            DeleteRegisry(id);
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                true,
+                "Registro de previsão deletado com sucesso."
+            );
+        }
+        
+        return new ResponseClient(
+            HttpStatusCode.Conflict,
+            false,
+            "Registro de previsão com id '" + id + "' não foi encontrado."
+        );
     }
 
-    public void TriggerBroker(List<Registry> registries)
+    public void TriggerBroker(List<SupervisoryRegistry> registries)
     {
-        foreach (Registry supervisoryRegistry in registries.ToList())
+        foreach (SupervisoryRegistry supervisoryRegistry in registries.ToList())
         {
-            CheckWhetherShouldTriggerBroker(supervisoryRegistry as SupervisoryRegistry);
+            CheckWhetherShouldTriggerBroker(supervisoryRegistry);
         }
     }
 

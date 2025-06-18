@@ -45,8 +45,24 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return await result.ToListAsync();
     }
 
-    public Task<SupervisoryRegistry> FindByNameAndVarType(string name, string varType)
+    public async Task<SupervisoryRegistry> FindByNameAndVarType(string name, string varType)
     {
-        throw new NotImplementedException();
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Nome, name) & 
+                     Builders<SupervisoryRegistry>.Filter.Eq(s => s.TipoDado, varType); //TODO passar o nomeVariavel para tipodado no front
+
+        using var result = await supervisoryRegistryCollection.FindAsync(filter);
+        return result.FirstOrDefault();    }
+
+    public async Task<SupervisoryRegistry> ReplaceOne(SupervisoryRegistry document)
+    {
+        var result = await supervisoryRegistryCollection.ReplaceOneAsync(
+            f => f.Id == document.Id, 
+            document
+        );
+
+        if (result.MatchedCount == 0)
+            return null;
+        
+        return document;
     }
 }
