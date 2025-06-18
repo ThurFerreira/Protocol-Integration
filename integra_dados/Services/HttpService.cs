@@ -7,7 +7,7 @@ namespace integra_dados.Services;
 
 public class HttpService(HttpClient httpClient)
 {
-    public async Task<string> Post(string url, object body, string token)
+    public async Task<HttpResponseMessage> Post(string url, object body, string token)
     { 
         string json = JsonConvert.SerializeObject(body);
         Console.WriteLine(json);
@@ -19,12 +19,11 @@ public class HttpService(HttpClient httpClient)
         {
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            string jsonString = await response.Content.ReadAsStringAsync();
-            return jsonString;
+            return response;
         }
         catch (HttpRequestException exception)
         {
-            return exception.Message;
+            return null;
         }
     }
 }
