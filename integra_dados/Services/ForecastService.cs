@@ -197,23 +197,23 @@ public class ForecastService(
         }
     }
 
-    private void MonitorSupervisory(ForecastRegistry registry)
+    private async void MonitorSupervisory(ForecastRegistry registry)
     {
         switch (registry.Nome)
         {
             case "temp":
-                // var registerValueStatus = ModbusService.ReadDiscreteInput(registry);
-                // registry.UpdateRegistry(registerValueStatus);
-                // ReplaceRegistry(registry);
-                // if (registry.ShouldSendToBroker(registerValueStatus))
-                // {
-                //     if (registerValueStatus != null)
-                //     {
-                //         Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueStatus);
-                //         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
-                //     }
-                // }
-                var response = windyService.
+                WindyResponse response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.TempSurface[0]);
+                float value = response.TempSurface[0];
+                
+                if (registry.ShouldSendToBroker(value))
+                {
+                    if (value != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, value);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
 
                 break;
             case "convPrecip":

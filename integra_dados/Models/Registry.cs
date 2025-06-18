@@ -66,6 +66,21 @@ public class Registry
         }
     }
     
+    public void UpdateRegistry(double onOffSwitchValue)
+    {
+        double VALUE_NOT_VALID = -1.0;
+        UpdateDate();
+
+        if (onOffSwitchValue == VALUE_NOT_VALID)
+        {
+            UpgradeStatusToUnavailable();
+        }
+        else
+        {
+            UpgradeStatusToAvailable();
+        }
+    }
+    
     public void UpdateRegistry(bool onOffSwitchValue)
     {
         UpdateDate();

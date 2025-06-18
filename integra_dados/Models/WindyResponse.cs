@@ -21,7 +21,7 @@ public class WindyResponse
 
     // [JsonIgnore]
     [JsonPropertyName("temp-surface")]
-    public List<double>? TempSurface { get; set; }
+    public List<float>? TempSurface { get; set; }
 
     // [JsonIgnore]
     [JsonPropertyName("wind_u-surface")]
