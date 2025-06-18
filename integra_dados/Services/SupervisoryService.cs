@@ -39,23 +39,19 @@ public class SupervisoryService(
             "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
 
-    public ResponseClient Edit(SupervisoryRegistry supervisoryRegistry)
+    public async Task<ResponseClient> Edit(SupervisoryRegistry supervisoryRegistry)
     {
         try
         {
-            var supervisoryFound = supervisoryRepository.FindById(supervisoryRegistry.IdSistema);
+            SupervisoryRegistry supervisoryFound = await supervisoryRepository.ReplaceOne(supervisoryRegistry);
             if (supervisoryFound != null)
             {
-                supervisoryRegistry.IdSistema = supervisoryFound.Id.ToString();
-
-                Task<SupervisoryRegistry> supervisoryEdited = supervisoryRepository.Save(supervisoryRegistry);
-
-                ReplaceRegistry(supervisoryEdited.Result);
+                ReplaceRegistry(supervisoryFound);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    supervisoryEdited,
+                    supervisoryRegistry,
                     "Registro atualizado com sucesso."
                 );
             }

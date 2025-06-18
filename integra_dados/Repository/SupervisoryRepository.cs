@@ -7,11 +7,16 @@ namespace integra_dados.Repository;
 public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : IRepository<SupervisoryRegistry>
 {
 
-    public async Task<SupervisoryRegistry> FindByName(string name)
+    public async Task<List<SupervisoryRegistry>> FindByName(string name)
     {
         var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Nome, name);
         using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
-        return await cursor.FirstOrDefaultAsync();
+        return cursor.ToList();
+    }
+
+    public Task<SupervisoryRegistry> FindOneByName(string name)
+    {
+        throw new NotImplementedException();
     }
 
     Task<SupervisoryRegistry> IRepository<SupervisoryRegistry>.Save(SupervisoryRegistry document)

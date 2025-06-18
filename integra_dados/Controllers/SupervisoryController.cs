@@ -30,9 +30,9 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
     }
     
     [HttpPut("edit")]
-    public IActionResult EditSupervisory([FromBody] SupervisoryRegistry supervisory)
+    public ActionResult EditSupervisory([FromBody] SupervisoryRegistry supervisory)
     {
-        var responseFromEdition = supervisoryService.Edit(supervisory);
+        ResponseClient responseFromEdition = supervisoryService.Edit(supervisory).Result;
         return StatusCode((int)responseFromEdition.ResponseStatus, responseFromEdition);
     }
     

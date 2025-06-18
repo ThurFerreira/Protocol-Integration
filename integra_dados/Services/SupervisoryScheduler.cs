@@ -15,12 +15,12 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
             SupervisoryService.StartRegistries(allRegistries);
         }
         
-        // using (var forecastScope = serviceProvider.CreateScope())
-        // {
-        //     var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
-        //     var allRegistries = await repository.FindAll();
-        //     ForecastService.StartRegistries(allRegistries);
-        // }
+        using (var forecastScope = serviceProvider.CreateScope())
+        {
+            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
+            var allRegistries = await repository.FindAll();
+            ForecastService.StartRegistries(allRegistries);
+        }
 
         // Loop principal do serviço
         while (!stoppingToken.IsCancellationRequested)
@@ -31,6 +31,12 @@ public class SupervisoryScheduler(IServiceProvider serviceProvider) : Background
                 {
                     var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
                     supervisoryService.TriggerBroker(SupervisoryService.GetRegistries());
+                }
+                
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var supervisoryService = scope.ServiceProvider.GetRequiredService<ForecastService>();
+                    supervisoryService.TriggerBroker(ForecastService.GetRegistries());
                 }
             }
             catch (Exception ex)
