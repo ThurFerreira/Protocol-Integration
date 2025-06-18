@@ -1,19 +1,22 @@
 using integra_dados.Models;
 using MongoDB.Bson;
 using Newtonsoft.Json;
+using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace integra_dados.Services;
 
 public class WindyApiService(HttpService httpService)
 {
-    public object? GetWindyForecast(double lat, double lng, string varType)
+    public async Task<WindyResponse> GetWindyForecast(double lat, double lng, string varType)
     {
         string token = "kjUV4msAS33SRffOHjdzLp0ygCxu1Fmr";
         WindyApiRequestModel body = new WindyApiRequestModel(lat, lng, new []{varType}, token);
         
-        string postResponse = httpService.Post("https://api.windy.com/api/point-forecast/v2", body, token).Result;
+        HttpResponseMessage response = await httpService.Post("https://api.windy.com/api/point-forecast/v2", body, token);
+        string responseBody = response.Content.ReadAsStringAsync().Result;
         
-        var responseObject = JsonConvert.DeserializeObject(postResponse, typeof(WindyResponse));
+        WindyResponse responseObject = JsonSerializer.Deserialize<WindyResponse>(responseBody)!;
         return responseObject;
     }
 }
