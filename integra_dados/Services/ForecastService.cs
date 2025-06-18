@@ -4,17 +4,17 @@ using integra_dados.Models.Response;
 using integra_dados.Repository;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
-using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
 public class ForecastService(
     IRepository<ForecastRegistry> forecastRepository,
     KafkaService kafkaService,
-    ModbusService modbusService)
+    ModbusService modbusService,
+    WindyApiService windyService)
 {
     private static Dictionary<string, ForecastRegistry> registries = new Dictionary<string, ForecastRegistry>();
-    
+
     public async Task<ResponseClient> Create(ForecastRegistry forecastRegistry)
     {
         try
@@ -23,12 +23,12 @@ public class ForecastService(
             {
                 forecastRegistry.TopicoBroker = forecastRegistry.Nome;
             }
-            
+
             if (forecastRepository.FindByNameAndVarType(forecastRegistry.Nome, forecastRegistry.TipoDado) != null)
             {
                 ForecastRegistry forecastCreated = await forecastRepository.Save(forecastRegistry);
                 AddRegistry(forecastCreated);
-                
+
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
@@ -46,6 +46,7 @@ public class ForecastService(
         }
         catch (Exception)
         {
+            return new ResponseClient();
             //TODO notificador
             // report.ModerateException(Status.Running);
             // return new ResponseClient(
@@ -56,7 +57,53 @@ public class ForecastService(
             // );
         }
     }
+
+    public async Task<ResponseClient> Edit(ForecastRegistry forecastRegistry)
+    {
+        ForecastRegistry forecastFound = await forecastRepository.ReplaceOne(forecastRegistry);
+        if (forecastFound != null)
+        {
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                true, forecastFound,
+                "Registro de previsão atualizado com sucesso."
+            );
+        }
+
+        return new ResponseClient(
+            HttpStatusCode.Conflict,
+            false, null,
+            "Registro de previsão com nome '" + forecastRegistry.Nome + "' não foi encontrado."
+        );
+    }
+
+    public async Task<ResponseClient> Delete(string id)
+    {
+        bool deleted = await forecastRepository.DeleteById(id);
+
+        if (deleted)
+        {
+            DeleteRegisry(id);
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                true,
+                "Registro de previsão deletado com sucesso."
+            );
+        }
+        
+        return new ResponseClient(
+            HttpStatusCode.Conflict,
+            false,
+            "Registro de previsão com id '" + id + "' não foi encontrado."
+        );
+    }
     
+    public void GetForecast(long lat, long lng, string varType)
+    {
+        windyService.GetWindyForecast(lat, lng, varType);
+    }
+
+
     void AddRegistry(ForecastRegistry registry)
     {
         registries.Add(registry.Id, registry);
@@ -108,7 +155,7 @@ public class ForecastService(
         }
     }
 
-    void StartRegistries(List<ForecastRegistry> updateRegistries)
+    public void StartRegistries(List<ForecastRegistry> updateRegistries)
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {

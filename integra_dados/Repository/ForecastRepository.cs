@@ -1,4 +1,5 @@
 using integra_dados.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using MongoDB.Driver;
 
 namespace integra_dados.Repository;
@@ -20,9 +21,11 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteById(string id)
+    public async Task<bool> DeleteById(string id)
     {
-        throw new NotImplementedException();
+        var filter = Builders<ForecastRegistry>.Filter.Eq(x => x.IdSistema, id);
+        var result = await forecastRegistryCollection.DeleteOneAsync(filter);
+        return result.DeletedCount > 0;
     }
 
     public Task<List<ForecastRegistry>> FindAll()
@@ -38,5 +41,18 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
         using var result = await forecastRegistryCollection.FindAsync(filter);
         return result.FirstOrDefault();
 
+    }
+
+    public async Task<ForecastRegistry> ReplaceOne(ForecastRegistry document)
+    {
+        var result = await forecastRegistryCollection.ReplaceOneAsync(
+            f => f.Id == document.Id, 
+            document
+        );
+
+        if (result.MatchedCount == 0)
+            return null;
+        
+        return document;
     }
 }

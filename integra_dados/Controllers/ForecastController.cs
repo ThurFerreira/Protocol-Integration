@@ -2,7 +2,6 @@ using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Services;
-using integra_dados.Util.Registries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
@@ -12,33 +11,32 @@ namespace integra_dados.Controllers;
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
     [HttpPost("create")]
-    public IActionResult Create([FromBody] ForecastRegistry forecast)
-    {
-        var responseClient = forecastService.Create(forecast);
-        return StatusCode(201);
-    }
-
-    [HttpPut("update")]
-    public async Task<ActionResult<ResponseClient>> Update([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] ForecastRegistry forecast)
     {
         forecast.SetIdSistema();
-        var responseFromRegistry = await ForecastService.Create(forecast);
+        ResponseClient response = await forecastService.Create(forecast);
         
-        return StatusCode(200, responseClient);
+        return StatusCode(200, response);
     }
 
-    [HttpDelete("delete/{id}")]
-    public IActionResult Delete([FromRoute] int id)
+    [HttpPut("edit")]
+    public async Task<ActionResult<ResponseClient>> Update([FromBody] ForecastRegistry forecast)
     {
-        // this.weatherService.deleteForecast(idSistema);
-        // return ResponseEntity.status(HttpStatus.OK).body(new ResponseClient("Registro deletado com sucesso"));
-        return StatusCode(201);
+        ResponseClient response = await forecastService.Edit(forecast);
+        return StatusCode(200, response);
+    }
+    
+    [HttpDelete("delete/{id}")]
+    public async Task<ActionResult<ResponseClient>> Delete([FromRoute] string id)
+    {
+        ResponseClient response = await forecastService.Delete(id);
+        return StatusCode(200, response);
     }
     
     [HttpGet("location")]
-    public IActionResult GetForecastOnPoint()
+    public IActionResult GetForecastOnPoint(long lat, long lng, string varType)
     {
-        // return this.weatherService.getForecast(new Location(lat, lng), this.getForecastVariableName());
+        forecastService.GetForecast(lat, lng, varType);
         return StatusCode(201);
     }
 
