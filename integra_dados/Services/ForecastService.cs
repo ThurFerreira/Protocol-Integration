@@ -106,9 +106,9 @@ public class ForecastService(
         return new ResponseClient(HttpStatusCode.OK, true, response, "Busca realizada com sucesso");
     }
 
-    public async Task<ResponseClient> GetLocationForecast(double lat, double lng, string varType)
+    public async Task<ResponseClient> GetLocationForecast(Location location, string varType)
     {
-        WindyResponse response = await windyService.GetWindyForecast(lat, lng, varType);
+        WindyResponse response = await windyService.GetWindyForecast(location, varType);
         return new ResponseClient(HttpStatusCode.OK, true, response, "Busca realizada com sucesso");
     }
 
@@ -199,12 +199,12 @@ public class ForecastService(
 
     private async void MonitorForecast(ForecastRegistry registry)
     {
-        WindyResponse response;
+        WindyResponse response = await windyService.GetWindyForecast(registry.Location, registry.Nome);
         
         switch (registry.Nome)
         {
             case "temp":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                response = await windyService.GetWindyForecast(registry.Location, registry.Nome);
                 registry.UpdateRegistry(response.TempSurface[0]);
                 float tempValue = response.TempSurface[0];
                 
@@ -219,7 +219,6 @@ public class ForecastService(
 
                 break;
             case "convPrecip":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.PrecipSurface[0]);
                 float precipValue = response.PrecipSurface[0];
                 
@@ -233,7 +232,6 @@ public class ForecastService(
                 }
                 break;
             case "wind":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
                 float[] windValue = new float[]{response.WindX[0], response.WindY[1]};
                 
@@ -247,7 +245,6 @@ public class ForecastService(
                 }
                 break;
             case "cape":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.CapeSurface[0]);
                 float capeValue = response.CapeSurface[0];
                 
@@ -261,7 +258,6 @@ public class ForecastService(
                 }
                 break;
             case "rh":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.Rh[0]);
                 float rhValue = response.Rh[0];
                 
@@ -275,7 +271,6 @@ public class ForecastService(
                 }
                 break;
             case "lclouds":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.LowCloudsCoverage[0]);
                 float lcValue = response.LowCloudsCoverage[0];
                 
@@ -289,7 +284,6 @@ public class ForecastService(
                 }
                 break;
             case "hclouds":
-                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.HighCloudsCoverage[0]);
                 float hcValue = response.HighCloudsCoverage[0];
                 

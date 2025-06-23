@@ -38,9 +38,10 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
         return result.DeletedCount > 0;
     }
 
-    public Task<List<ForecastRegistry>> FindAll()
+    public async Task<List<ForecastRegistry>> FindAll()
     {
-        throw new NotImplementedException();
+        var result = await forecastRegistryCollection.FindAsync(FilterDefinition<ForecastRegistry>.Empty);
+        return await result.ToListAsync();
     }
 
     public async Task<ForecastRegistry> FindByNameAndVarType(string name, string varType)

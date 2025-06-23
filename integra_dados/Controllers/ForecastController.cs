@@ -10,8 +10,8 @@ namespace integra_dados.Controllers;
 [Route("/forecast/")]
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
-    [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] ForecastRegistry forecast)
+    [HttpPut("create")] //POST 
+    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
     {
         forecast.SetIdSistema();
         ResponseClient response = await forecastService.Create(forecast);
@@ -34,9 +34,9 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     }
     
     [HttpGet("location")]
-    public async Task<ActionResult> GetForecastOnLocation(double lat, double lng, string varType)
+    public async Task<ActionResult> GetForecastOnLocation(Location location, string varType)
     {
-        ResponseClient response = await forecastService.GetLocationForecast(lat, lng, varType);
+        ResponseClient response = await forecastService.GetLocationForecast(location, varType);
         return StatusCode(200, response);
     }
 
