@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace integra_dados.Controllers;
 
 [ApiController]
-[Route("/forecast/")]
+[Route("/forecast/windy/")]
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
     [HttpPut("create")] //POST 

@@ -9,4 +9,6 @@ public class ForecastRegistry : Registry
     }
 
     public string? TipoMedida { get; set; }
+
+    public string FreqLeituraMin { get; set; }
 }
