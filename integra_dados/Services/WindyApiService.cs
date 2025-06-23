@@ -14,7 +14,7 @@ public class WindyApiService(HttpService httpService)
         WindyApiRequestModel body = new WindyApiRequestModel(location.Lat, location.Lng, new []{varType}, token);
         
         HttpResponseMessage response = await httpService.Post("https://api.windy.com/api/point-forecast/v2", body, token);
-        string responseBody = response.Content.ReadAsStringAsync().Result;
+        var responseBody = await response.Content.ReadAsStringAsync();
         
         WindyResponse responseObject = JsonSerializer.Deserialize<WindyResponse>(responseBody)!;
         return responseObject;

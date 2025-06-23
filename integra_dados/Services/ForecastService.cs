@@ -187,9 +187,9 @@ public class ForecastService(
 
     public void CheckWhetherShouldTriggerBroker(ForecastRegistry registry)
     {
-        if (int.Parse(registry.FreqLeituraSeg) > 0)
+        if (int.Parse(registry.FreqLeituraMin) > 0)
         {
-            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg)))
+            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraMin)))
             {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorForecast(registry);
@@ -199,12 +199,11 @@ public class ForecastService(
 
     private async void MonitorForecast(ForecastRegistry registry)
     {
-        WindyResponse response = await windyService.GetWindyForecast(registry.Location, registry.Nome);
+        WindyResponse response = await windyService.GetWindyForecast(registry.Location, registry.TipoDado);
         
-        switch (registry.Nome)
+        switch (registry.TipoDado)
         {
             case "temp":
-                response = await windyService.GetWindyForecast(registry.Location, registry.Nome);
                 registry.UpdateRegistry(response.TempSurface[0]);
                 float tempValue = response.TempSurface[0];
                 
