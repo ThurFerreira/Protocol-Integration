@@ -1,12 +1,12 @@
 version: '3.4'
 
 services:
-  integra_dados:
+  microservice_integra_dados:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: integra_dados-csharp
-    image: integra_dados
+    container_name: microservice_integra_dados
+    image: microservice_integra_dados
     ports:
       - "7001:7001"
     environment:
