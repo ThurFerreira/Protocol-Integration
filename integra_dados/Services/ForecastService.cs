@@ -205,7 +205,7 @@ public class ForecastService(
         {
             case "temp":
                 registry.UpdateRegistry(response.TempSurface[0]);
-                float tempValue = response.TempSurface[0];
+                float tempValue = (float) Math.Round(response.TempSurface[0] - 273.15F, 1);
                 
                 if (registry.ShouldSendToBroker(tempValue))
                 {
