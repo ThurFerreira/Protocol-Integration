@@ -62,7 +62,7 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<GenericDataService>();
 
 // Background Services
-builder.Services.AddHostedService<SupervisoryScheduler>();
+builder.Services.AddHostedService<Scheduler>();
 
 // Adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();

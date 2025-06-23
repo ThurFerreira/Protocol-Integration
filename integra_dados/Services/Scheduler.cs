@@ -3,7 +3,7 @@ using integra_dados.Repository;
 
 namespace integra_dados.Services;
 
-public class SupervisoryScheduler(IServiceProvider serviceProvider) : BackgroundService
+public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
