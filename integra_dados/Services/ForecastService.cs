@@ -192,41 +192,115 @@ public class ForecastService(
             if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg)))
             {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
-                MonitorSupervisory(registry);
+                MonitorForecast(registry);
             }
         }
     }
 
-    private async void MonitorSupervisory(ForecastRegistry registry)
+    private async void MonitorForecast(ForecastRegistry registry)
     {
+        WindyResponse response;
+        
         switch (registry.Nome)
         {
             case "temp":
-                WindyResponse response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
                 registry.UpdateRegistry(response.TempSurface[0]);
-                float value = response.TempSurface[0];
+                float tempValue = response.TempSurface[0];
                 
-                if (registry.ShouldSendToBroker(value))
+                if (registry.ShouldSendToBroker(tempValue))
                 {
-                    if (value != null)
+                    if (tempValue != null)
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, value);
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, tempValue);
                         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                     }
                 }
 
                 break;
             case "convPrecip":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.PrecipSurface[0]);
+                float precipValue = response.PrecipSurface[0];
+                
+                if (registry.ShouldSendToBroker(precipValue))
+                {
+                    if (precipValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, precipValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
             case "wind":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
+                float[] windValue = new float[]{response.WindX[0], response.WindY[1]};
+                
+                if (registry.ShouldSendToBroker(windValue))
+                {
+                    if (windValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, windValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
             case "cape":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.CapeSurface[0]);
+                float capeValue = response.CapeSurface[0];
+                
+                if (registry.ShouldSendToBroker(capeValue))
+                {
+                    if (capeValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, capeValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
             case "rh":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.Rh[0]);
+                float rhValue = response.Rh[0];
+                
+                if (registry.ShouldSendToBroker(rhValue))
+                {
+                    if (rhValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, rhValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
             case "lclouds":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.LowCloudsCoverage[0]);
+                float lcValue = response.LowCloudsCoverage[0];
+                
+                if (registry.ShouldSendToBroker(lcValue))
+                {
+                    if (lcValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, lcValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
             case "hclouds":
+                response = await windyService.GetWindyForecast(registry.Lat, registry.Lng, registry.Nome);
+                registry.UpdateRegistry(response.HighCloudsCoverage[0]);
+                float hcValue = response.HighCloudsCoverage[0];
+                
+                if (registry.ShouldSendToBroker(hcValue))
+                {
+                    if (hcValue != null)
+                    {
+                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, hcValue);
+                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                    }
+                }
                 break;
         }
     }
