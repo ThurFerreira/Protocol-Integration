@@ -4,15 +4,16 @@ using integra_dados.Models.Response;
 using integra_dados.Repository;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
-using integra_dados.Util.Registries;
 
 namespace integra_dados.Services;
 
 public class SupervisoryService(
-    ISupervisoryRepository supervisoryRepository,
+    IRepository<SupervisoryRegistry> supervisoryRepository,
     KafkaService kafkaService,
-    ModbusApi modbusApi)
+    ModbusService modbusService)
 {
+    private static Dictionary<string, SupervisoryRegistry> registries = new Dictionary<string, SupervisoryRegistry>();
+
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
     {
@@ -24,7 +25,7 @@ public class SupervisoryService(
         if (supervisoryRepository.FindByName(registry.Nome) != null)
         {
             var savedRegistry = await supervisoryRepository.Save(registry);
-            RegistryManager.AddRegistry(savedRegistry);
+            AddRegistry(savedRegistry);
             return new ResponseClient(
                 HttpStatusCode.OK,
                 true, savedRegistry,
@@ -38,23 +39,19 @@ public class SupervisoryService(
             "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
 
-    public ResponseClient Edit(SupervisoryRegistry supervisoryRegistry)
+    public async Task<ResponseClient> Edit(SupervisoryRegistry supervisoryRegistry)
     {
         try
         {
-            var supervisoryFound = supervisoryRepository.FindById(supervisoryRegistry.IdSistema);
+            SupervisoryRegistry supervisoryFound = await supervisoryRepository.ReplaceOne(supervisoryRegistry);
             if (supervisoryFound != null)
             {
-                supervisoryRegistry.IdSistema = supervisoryFound.Id.ToString();
-
-                Task<SupervisoryRegistry> supervisoryEdited = supervisoryRepository.Save(supervisoryRegistry);
-
-                RegistryManager.ReplaceRegistry(supervisoryEdited.Result);
+                ReplaceRegistry(supervisoryFound);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    supervisoryEdited,
+                    supervisoryRegistry,
                     "Registro atualizado com sucesso."
                 );
             }
@@ -80,10 +77,25 @@ public class SupervisoryService(
         }
     }
 
-    public void Delete(string id)
+    public async Task<ResponseClient> Delete(string id)
     {
-        supervisoryRepository.DeleteById(id);
-        RegistryManager.DeleteRegisry(id);
+        bool deleted = await supervisoryRepository.DeleteById(id);
+
+        if (deleted)
+        {
+            DeleteRegisry(id);
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                true,
+                "Registro de previsão deletado com sucesso."
+            );
+        }
+        
+        return new ResponseClient(
+            HttpStatusCode.Conflict,
+            false,
+            "Registro de previsão com id '" + id + "' não foi encontrado."
+        );
     }
 
     public void TriggerBroker(List<SupervisoryRegistry> registries)
@@ -111,9 +123,9 @@ public class SupervisoryService(
         switch (registry.TipoDado)
         {
             case "discreteInput":
-                var registerValueStatus = ModbusApi.ReadDiscreteInput(registry);
+                var registerValueStatus = ModbusService.ReadDiscreteInput(registry);
                 registry.UpdateRegistry(registerValueStatus);
-                RegistryManager.ReplaceRegistry(registry);
+                ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueStatus))
                 {
                     if (registerValueStatus != null)
@@ -122,24 +134,27 @@ public class SupervisoryService(
                         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                     }
                 }
+
                 break;
             case "inputRegister":
-                var registerValueIntRegister = ModbusApi.ReadInputRegister(registry);
+                var registerValueIntRegister = ModbusService.ReadInputRegister(registry);
                 registry.UpdateRegistry(registerValueIntRegister);
-                RegistryManager.ReplaceRegistry(registry);
+                ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueIntRegister))
                 {
                     if (registerValueIntRegister != -1)
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, registerValueIntRegister);
+                        Event1000_1 brokerPackage =
+                            kafkaService.CreateBrokerPackage(registry, registerValueIntRegister);
                         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                     }
                 }
+
                 break;
             case "coil":
-                var registerValueCoil = ModbusApi.ReadCoil(registry);
+                var registerValueCoil = ModbusService.ReadCoil(registry);
                 registry.UpdateRegistry(registerValueCoil);
-                RegistryManager.ReplaceRegistry(registry);
+                ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueCoil))
                 {
                     if (registerValueCoil != null)
@@ -148,11 +163,12 @@ public class SupervisoryService(
                         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                     }
                 }
+
                 break;
             case "holdingRegister":
-                var registerValueHolding = ModbusApi.ReadHoldingRegister(registry);
+                var registerValueHolding = ModbusService.ReadHoldingRegister(registry);
                 registry.UpdateRegistry(registerValueHolding);
-                RegistryManager.ReplaceRegistry(registry);
+                ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueHolding))
                 {
                     if (registerValueHolding != -1)
@@ -161,7 +177,72 @@ public class SupervisoryService(
                         kafkaService.Publish(registry.TopicoBroker, brokerPackage);
                     }
                 }
+
                 break;
         }
+    }
+
+    public static void AddRegistry(SupervisoryRegistry registry)
+    {
+        registries.Add(registry.Id, registry);
+    }
+
+    public static List<SupervisoryRegistry> GetRegistries()
+    {
+        return registries.Values.ToList();
+    }
+
+    public static ResponseClient GetOne(int idSistema)
+    {
+        var foundRegistry = registries
+            .FirstOrDefault(registry => registry.Value.IdSistema.Equals(idSistema));
+
+        return CreateResponseToFoundRegistry(idSistema, foundRegistry.Value);
+    }
+
+    private static ResponseClient CreateResponseToFoundRegistry(int idSistema, Registry? foundRegistry)
+    {
+        if (foundRegistry != null)
+        {
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                true,
+                foundRegistry,
+                "Previsão recuperado com sucesso."
+            );
+        }
+        else
+        {
+            return new ResponseClient(
+                HttpStatusCode.OK,
+                false,
+                null,
+                $"Não foi possível recuperar a previsão cujo id = {idSistema}."
+            );
+        }
+    }
+
+    public static void ReplaceRegistry(SupervisoryRegistry supervisoryEdited)
+    {
+        foreach (var registry in registries.Values.ToList())
+        {
+            if (registry.IdSistema.Equals(supervisoryEdited.IdSistema))
+            {
+                registries[registry.IdSistema] = supervisoryEdited;
+            }
+        }
+    }
+
+    public static void StartRegistries(List<SupervisoryRegistry> updateRegistries)
+    {
+        foreach (var supervisoryRegistry in updateRegistries)
+        {
+            registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
+        }
+    }
+
+    public static void DeleteRegisry(string id)
+    {
+        registries.Remove(id);
     }
 }

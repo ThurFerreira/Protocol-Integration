@@ -4,17 +4,27 @@ using MongoDB.Driver;
 
 namespace integra_dados.Repository;
 
-public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : ISupervisoryRepository
+public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervisoryRegistryCollection) : IRepository<SupervisoryRegistry>
 {
 
-    public async Task<SupervisoryRegistry> FindByName(string name)
+    public async Task<List<SupervisoryRegistry>> FindByName(string name)
     {
         var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Nome, name);
         using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
-        return await cursor.FirstOrDefaultAsync();
+        return cursor.ToList();
     }
 
-    public async Task<SupervisoryRegistry> Save(SupervisoryRegistry document)
+    public Task<SupervisoryRegistry> FindOneByName(string name)
+    {
+        throw new NotImplementedException();
+    }
+
+    Task<SupervisoryRegistry> IRepository<SupervisoryRegistry>.Save(SupervisoryRegistry document)
+    {
+        return Save(document);
+    }
+
+    async Task<SupervisoryRegistry> Save(SupervisoryRegistry document)
     {
         await supervisoryRegistryCollection.InsertOneAsync(document);
         return document;
@@ -38,5 +48,26 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
     {
         var result = await supervisoryRegistryCollection.FindAsync(FilterDefinition<SupervisoryRegistry>.Empty);
         return await result.ToListAsync();
+    }
+
+    public async Task<SupervisoryRegistry> FindByNameAndVarType(string name, string varType)
+    {
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Nome, name) & 
+                     Builders<SupervisoryRegistry>.Filter.Eq(s => s.TipoDado, varType); //TODO passar o nomeVariavel para tipodado no front
+
+        using var result = await supervisoryRegistryCollection.FindAsync(filter);
+        return result.FirstOrDefault();    }
+
+    public async Task<SupervisoryRegistry> ReplaceOne(SupervisoryRegistry document)
+    {
+        var result = await supervisoryRegistryCollection.ReplaceOneAsync(
+            f => f.Id == document.Id, 
+            document
+        );
+
+        if (result.MatchedCount == 0)
+            return null;
+        
+        return document;
     }
 }

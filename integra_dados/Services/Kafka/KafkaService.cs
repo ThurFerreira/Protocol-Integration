@@ -46,6 +46,39 @@ public class KafkaService
             registry.UltimaAtualizacao
         );
     }
+    
+    public Event1000_1 CreateBrokerPackage(ForecastRegistry registry, float[] reisterValue)
+    {
+        return new Event1000_1(
+            int.Parse(registry.IdSistema),
+            registry.Nome,
+            0,
+            reisterValue,
+            registry.UltimaAtualizacao
+        );
+    }
+    
+    public Event1000_1 CreateBrokerPackage(ForecastRegistry registry, int reisterValue)
+    {
+        return new Event1000_1(
+            int.Parse(registry.IdSistema),
+            registry.Nome,
+            0,
+            reisterValue,
+            registry.UltimaAtualizacao
+        );
+    }
+    
+    public Event1000_1 CreateBrokerPackage(ForecastRegistry registry, float reisterValue)
+    {
+        return new Event1000_1(
+            int.Parse(registry.IdSistema),
+            registry.Nome,
+            0,
+            reisterValue,
+            registry.UltimaAtualizacao
+        );
+    }
 
     public async void Publish(string topic, Event1000_1 pkg)
     {

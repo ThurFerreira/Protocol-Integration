@@ -4,52 +4,55 @@ using integra_dados.Repository;
 using integra_dados.Services;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+// Http Client
+builder.Services.AddHttpClient<HttpService>();
 
 // Modbus
-builder.Services.AddSingleton<ModbusApi>();
+builder.Services.AddSingleton<ModbusService>();
 
 // Kafka
 builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("Kafka"));
 builder.Services.AddSingleton<KafkaService>();
 
 // MongoDB
-var mongoSettings = builder.Configuration.GetSection("MongoDb").Get<MongoDbConfig>();
+builder.Services.Configure<MongoDbConfig>(
+    builder.Configuration.GetSection("MongoDb")
+);
+
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var connectionString = mongoSettings.ConnectionString;
-    return new MongoClient(connectionString);
+    var settings = sp.GetRequiredService<IOptions<MongoDbConfig>>().Value;
+    if (string.IsNullOrEmpty(settings.ConnectionString))
+        throw new ArgumentException("MongoDB ConnectionString is null or empty.");
+
+    return new MongoClient(settings.ConnectionString);
 });
 
-builder.Services.AddScoped(s =>
-{
-    var client = s.GetRequiredService<IMongoClient>();
-    var database = client.GetDatabase(mongoSettings.DatabaseName);
-    return database.GetCollection<SupervisoryRegistry>(nameof(SupervisoryRegistry));
-});
+builder.Services.AddMongoCollection<ForecastRegistry>();
+builder.Services.AddMongoCollection<SupervisoryRegistry>();
 
-builder.Services.AddScoped<ISupervisoryRepository, SupervisoryRepository>();
+builder.Services.AddScoped<IRepository<SupervisoryRegistry>, SupervisoryRepository>();
+builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
 builder.Services.AddScoped<SupervisoryService>();
+builder.Services.AddScoped<ForecastService>();
+
 
 // Http server config
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(serverSettings.Port);
-});
+builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(serverSettings.Port); });
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowOtherApp", policy =>
     {
-        policy.AllowAnyOrigin()     // Permite qualquer origem
-            .AllowAnyMethod()     // Permite qualquer método HTTP
-            .AllowAnyHeader();    // Permite qualquer header
+        policy.AllowAnyOrigin() // Permite qualquer origem
+            .AllowAnyMethod() // Permite qualquer método HTTP
+            .AllowAnyHeader(); // Permite qualquer header
     });
 });
 
@@ -59,19 +62,22 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<GenericDataService>();
 
 // Background Services
-builder.Services.AddHostedService<SupervisoryScheduler>();
+builder.Services.AddHostedService<Scheduler>();
 
 // Adiciona Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Windy Service
+builder.Services.AddSingleton<WindyApiService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 // }
 
 app.UseCors("AllowOtherApp");

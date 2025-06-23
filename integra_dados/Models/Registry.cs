@@ -24,6 +24,8 @@ public class Registry
     public DateTime UltimaAtualizacao { get; set; }
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
+    public string? FreqLeituraSeg { get; set; } //TODO int
+    
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
     public long LastRead { get; set; } = 0;
@@ -52,6 +54,21 @@ public class Registry
     public void UpdateRegistry(int onOffSwitchValue)
     {
         const int VALUE_NOT_VALID = -1;
+        UpdateDate();
+
+        if (onOffSwitchValue == VALUE_NOT_VALID)
+        {
+            UpgradeStatusToUnavailable();
+        }
+        else
+        {
+            UpgradeStatusToAvailable();
+        }
+    }
+    
+    public void UpdateRegistry(double onOffSwitchValue)
+    {
+        double VALUE_NOT_VALID = -1.0;
         UpdateDate();
 
         if (onOffSwitchValue == VALUE_NOT_VALID)
