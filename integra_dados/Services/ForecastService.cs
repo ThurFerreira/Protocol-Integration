@@ -123,15 +123,15 @@ public class ForecastService(
         return registries.Values.ToList();
     }
 
-    ResponseClient GetOne(int idSistema)
+    public static ResponseClient GetOne(int id)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.Id.Equals(idSistema));
+            .FirstOrDefault(registry => registry.Value.Id.Equals(id));
 
-        return CreateResponseToFoundRegistry(idSistema, foundRegistry.Value);
+        return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
 
-    ResponseClient CreateResponseToFoundRegistry(int idSistema, ForecastRegistry? foundRegistry)
+    static ResponseClient CreateResponseToFoundRegistry(int idSistema, ForecastRegistry? foundRegistry)
     {
         if (foundRegistry != null)
         {
