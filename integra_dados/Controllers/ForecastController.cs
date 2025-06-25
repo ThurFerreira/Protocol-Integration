@@ -56,4 +56,17 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
         ResponseClient response = await forecastService.GetAllForecastForVariable(varType);
         return Ok(response);
     }
+    
+    [HttpGet("all")]
+    public ActionResult<ResponseClient> GetAll()
+    {
+        List<ForecastRegistry> registries = ForecastService.GetRegistries();
+        ResponseClient response = new ResponseClient(
+            HttpStatusCode.OK,
+            true,
+            registries,
+            $"Busca recuperada (Quantidade de documentos: {registries.Count})."
+        );
+        return Ok(response);
+    }
 }
