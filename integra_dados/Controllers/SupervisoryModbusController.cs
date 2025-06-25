@@ -17,7 +17,7 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
 
         var responseFromRegistry = await supervisoryService.Create(supervisory);
 
-        return StatusCode((int) responseFromRegistry.ResponseStatus, responseFromRegistry);
+        return Ok(responseFromRegistry);
     }
     
     [HttpGet("{id}")]
@@ -26,21 +26,21 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
     public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int idSistema)
     {
         var responseClient = SupervisoryService.GetOne(idSistema);
-        return StatusCode((int)responseClient.ResponseStatus, responseClient);
+        return Ok(responseClient);
     }
     
     [HttpPut("edit")]
     public ActionResult EditSupervisory([FromBody] SupervisoryRegistry supervisory)
     {
         ResponseClient responseFromEdition = supervisoryService.Edit(supervisory).Result;
-        return StatusCode((int)responseFromEdition.ResponseStatus, responseFromEdition);
+        return Ok(responseFromEdition);
     }
     
     [HttpDelete("delete/{id}")]
     public IActionResult DeleteSupervisoryRegistry([FromRoute] int id)
     {
         supervisoryService.Delete(id);
-        return StatusCode(StatusCodes.Status200OK, new ResponseClient("Registro deletado com sucesso"));
+        return Ok(new ResponseClient("Registro deletado com sucesso"));
     }
 
     [HttpGet("all")]
@@ -53,7 +53,7 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
             registries,
             $"Busca recuperada (Quantidade de documentos: {registries.Count})."
         );
-        return StatusCode((int)HttpStatusCode.OK, response);
+        return Ok(response);
     }
     
         
@@ -69,6 +69,6 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
             $"Busca recuperada (Quantidade de documentos: {registries.Count})."
         );
 
-        return StatusCode((int)responseClient.ResponseStatus, responseClient);
+        return Ok(responseClient);
     }
 }

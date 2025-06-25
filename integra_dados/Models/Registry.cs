@@ -14,7 +14,7 @@ public class Registry
     public int Id { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
-    public StatusVariable Status { get; set; }
+    public StatusVariable? Status { get; set; }
     [JsonIgnore]
     public string? Nome { get; set; }
     public string? Fonte { get; set; }

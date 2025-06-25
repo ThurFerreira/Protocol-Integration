@@ -11,6 +11,6 @@ public class GenericDataController(GenericDataService dataService) : ControllerB
     public IActionResult Create()
     {
         List<object> list = dataService.GetSupervisoryAndForecastData();
-        return StatusCode(StatusCodes.Status200OK, list);
+        return Ok(list);
     }
 }

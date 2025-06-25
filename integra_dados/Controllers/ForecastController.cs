@@ -16,28 +16,28 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
         forecast.SetIdSistema();
         ResponseClient response = await forecastService.Create(forecast);
         
-        return StatusCode(200, response);
+        return Ok(response);
     }
 
     [HttpPut("edit")]
     public ActionResult Update([FromBody] ForecastRegistry forecast)
     {
         ResponseClient response = forecastService.Edit(forecast).Result;
-        return StatusCode(200, response);
+        return Ok(response);
     }
     
     [HttpDelete("delete/{id}")]
     public async Task<ActionResult<ResponseClient>> Delete([FromRoute] int id)
     {
         ResponseClient response = await forecastService.Delete(id);
-        return StatusCode(200, response);
+        return Ok(response);
     }
     
     [HttpGet("location")]
     public async Task<ActionResult> GetForecastOnLocation(Location location, string varType)
     {
         ResponseClient response = await forecastService.GetLocationForecast(location, varType);
-        return StatusCode(200, response);
+        return Ok(response);
     }
 
 
@@ -45,6 +45,6 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     public async Task<ActionResult> GetAllForecastsForVariable([FromRoute] string varType)
     {
         ResponseClient response = await forecastService.GetAllForecastForVariable(varType);
-        return StatusCode(200, response);
+        return Ok(response);
     }
 }
