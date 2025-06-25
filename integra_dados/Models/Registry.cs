@@ -10,10 +10,11 @@ public class Registry
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string? _id { get; set; }
+    [JsonIgnore]
     public int Id { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
-    public int Status { get; set; }
+    public StatusVariable Status { get; set; }
     [JsonIgnore]
     public string? Nome { get; set; }
     public string? Fonte { get; set; }
@@ -91,12 +92,12 @@ public class Registry
 
     public void UpgradeStatusToAvailable()
     {
-        Status = (int)StatusVariable.AVAILABLE;
+        Status = StatusVariable.AVAILABLE;
     }
 
     public void UpgradeStatusToUnavailable()
     {
-        Status = (int)StatusVariable.UNAVAILABLE;
+        Status = StatusVariable.UNAVAILABLE;
     }
 
     public bool ShouldSendToBroker(Object actualRegisteredValue)
