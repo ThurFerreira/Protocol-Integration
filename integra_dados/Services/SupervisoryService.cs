@@ -12,7 +12,7 @@ public class SupervisoryService(
     KafkaService kafkaService,
     ModbusService modbusService)
 {
-    private static Dictionary<string, SupervisoryRegistry> registries = new Dictionary<string, SupervisoryRegistry>();
+    private static Dictionary<int, SupervisoryRegistry> registries = new Dictionary<int, SupervisoryRegistry>();
 
     // Report _report;
     public async Task<ResponseClient> Create(SupervisoryRegistry registry)
@@ -77,7 +77,7 @@ public class SupervisoryService(
         }
     }
 
-    public async Task<ResponseClient> Delete(string id)
+    public async Task<ResponseClient> Delete(int id)
     {
         bool deleted = await supervisoryRepository.DeleteById(id);
 
@@ -108,9 +108,9 @@ public class SupervisoryService(
 
     public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry)
     {
-        if (int.Parse(registry.FreqLeituraSeg) > 0)
+        if (registry.FreqLeituraSeg > 0)
         {
-            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraSeg)))
+            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
             {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
@@ -192,12 +192,12 @@ public class SupervisoryService(
         return registries.Values.ToList();
     }
 
-    public static ResponseClient GetOne(int idSistema)
+    public static ResponseClient GetOne(int id)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.IdSistema.Equals(idSistema));
+            .FirstOrDefault(registry => registry.Value.Id.Equals(id));
 
-        return CreateResponseToFoundRegistry(idSistema, foundRegistry.Value);
+        return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
 
     private static ResponseClient CreateResponseToFoundRegistry(int idSistema, Registry? foundRegistry)
@@ -226,9 +226,9 @@ public class SupervisoryService(
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.IdSistema.Equals(supervisoryEdited.IdSistema))
+            if (registry.Id.Equals(supervisoryEdited.Id))
             {
-                registries[registry.IdSistema] = supervisoryEdited;
+                registries[registry.Id] = supervisoryEdited;
             }
         }
     }
@@ -241,7 +241,7 @@ public class SupervisoryService(
         }
     }
 
-    public static void DeleteRegisry(string id)
+    public static void DeleteRegisry(int id)
     {
         registries.Remove(id);
     }

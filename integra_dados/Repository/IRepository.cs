@@ -8,8 +8,8 @@ public interface IRepository<T>
     public Task<List<T>> FindByName(String name);
     public Task<T> FindOneByName(String name);
     public Task<T> Save(T document);
-    public Task<T> FindById(string? idSistema);
-    public Task<bool> DeleteById(string id);
+    public Task<T> FindById(int idSistema);
+    public Task<bool> DeleteById(int id);
     public Task<List<T>> FindAll();
     public Task<T> FindByNameAndVarType(string name, string varType);
     public Task<T> ReplaceOne(T document);

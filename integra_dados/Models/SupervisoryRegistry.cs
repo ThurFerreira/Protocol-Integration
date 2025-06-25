@@ -7,7 +7,7 @@ public class SupervisoryRegistry : Registry
 
     // Dados de monitoramento do supervisório
     public string? Ip { get; set; }
-    public string? Porta { get; set; } //TODO int
-    public string? EnderecoInicio { get; set; } //TODO mudar para int
+    public int Porta { get; set; } //TODO int
+    public int EnderecoInicio { get; set; } //TODO mudar para int
     public int QuantidadeTags { get; set; }
 }

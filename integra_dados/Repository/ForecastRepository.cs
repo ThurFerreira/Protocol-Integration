@@ -26,14 +26,14 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
         return document;
     }
 
-    public Task<ForecastRegistry> FindById(string? idSistema)
+    public Task<ForecastRegistry> FindById(int id)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<bool> DeleteById(string id)
+    public async Task<bool> DeleteById(int id)
     {
-        var filter = Builders<ForecastRegistry>.Filter.Eq(x => x.IdSistema, id);
+        var filter = Builders<ForecastRegistry>.Filter.Eq(x => x.Id, id);
         var result = await forecastRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
@@ -47,7 +47,7 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
     public async Task<ForecastRegistry> FindByNameAndVarType(string name, string varType)
     {
         var filter = Builders<ForecastRegistry>.Filter.Eq(s => s.Nome, name) & 
-                     Builders<ForecastRegistry>.Filter.Eq(s => s.TipoDado, varType); //TODO passar o nomeVariavel para tipodado no front
+                     Builders<ForecastRegistry>.Filter.Eq(s => s.TipoDado, varType); 
 
         using var result = await forecastRegistryCollection.FindAsync(filter);
         return result.FirstOrDefault();

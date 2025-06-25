@@ -30,16 +30,16 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
         return document;
     }
 
-    public async Task<SupervisoryRegistry> FindById(string? idSistema)
+    public async Task<SupervisoryRegistry> FindById(int id)
     {
-        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.IdSistema, idSistema);
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(s => s.Id, id);
         using var cursor = await supervisoryRegistryCollection.FindAsync(filter);
         return await cursor.FirstOrDefaultAsync();
     }
 
-    public async Task<bool> DeleteById(string id)
+    public async Task<bool> DeleteById(int id)
     {
-        var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.IdSistema, id);
+        var filter = Builders<SupervisoryRegistry>.Filter.Eq(x => x.Id, id);
         var result = await supervisoryRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
