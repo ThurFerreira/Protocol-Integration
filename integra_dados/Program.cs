@@ -4,8 +4,10 @@ using integra_dados.Repository;
 using integra_dados.Services;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
+using integra_dados.Services.Notifier;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Report = integra_dados.Models.Report;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,8 @@ builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
 builder.Services.AddScoped<SupervisoryService>();
 builder.Services.AddScoped<ForecastService>();
 
+builder.Services.AddSingleton<Report>();
+builder.Services.AddSingleton<ExceptionInfo>();
 
 // Http server config
 var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
