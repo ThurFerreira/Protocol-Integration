@@ -14,7 +14,7 @@ public class Report : ICloneable
     [JsonPropertyName("exceptionInfo")]
     public ExceptionInfo ExceptionInfo { get; private set; } = new();
 
-    public string ApplicationName { get; private set; } = "iot_modbus";
+    public string ApplicationName { get; private set; } = "microservice_integra_dados";
     public ResetInfo ResetInfo;
 
     public object Clone()

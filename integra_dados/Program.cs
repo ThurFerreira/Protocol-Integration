@@ -7,7 +7,6 @@ using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using Report = integra_dados.Models.Report;
 
 var builder = WebApplication.CreateBuilder(args);
 
