@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using integra_dados.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace integra_dados.Repository;
@@ -65,7 +66,7 @@ public class SupervisoryRepository(IMongoCollection<SupervisoryRegistry> supervi
             document
         );
 
-        if (result.MatchedCount == 0)
+        if (result.ModifiedCount == 0)
             return null;
         
         return document;

@@ -6,10 +6,6 @@ namespace integra_dados.Models;
 
 public class Registry
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    [JsonIgnore]
-    public string? _id { get; set; }
     [JsonIgnore]
     public int Id { get; set; }
     [JsonIgnore]

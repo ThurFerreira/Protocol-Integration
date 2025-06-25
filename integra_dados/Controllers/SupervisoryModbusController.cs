@@ -30,9 +30,9 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
     }
     
     [HttpPut("edit")]
-    public ActionResult EditSupervisory([FromBody] SupervisoryRegistry supervisory)
+    public async Task<ActionResult> EditSupervisory([FromBody] SupervisoryRegistry supervisory)
     {
-        ResponseClient responseFromEdition = supervisoryService.Edit(supervisory).Result;
+        ResponseClient responseFromEdition = await supervisoryService.Edit(supervisory);
         return Ok(responseFromEdition);
     }
     

@@ -10,7 +10,7 @@ namespace integra_dados.Controllers;
 [Route("/forecast/windy/")]
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
-    [HttpPost("create")] //POST 
+    [HttpPost("create")]
     public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
     {
         forecast.SetIdSistema();
@@ -20,9 +20,9 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     }
 
     [HttpPut("edit")]
-    public ActionResult Update([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult> Update([FromBody] ForecastRegistry forecast)
     {
-        ResponseClient response = forecastService.Edit(forecast).Result;
+        ResponseClient response = await forecastService.Edit(forecast);
         return Ok(response);
     }
     

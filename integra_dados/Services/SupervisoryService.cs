@@ -189,7 +189,7 @@ public class SupervisoryService(
 
     public static List<SupervisoryRegistry> GetRegistries()
     {
-        return registries.Values.ToList();
+        return registries.Values.ToList(); //buscar no banco isso aqui é muito burro
     }
 
     public static ResponseClient GetOne(int id)
