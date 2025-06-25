@@ -10,7 +10,7 @@ namespace integra_dados.Controllers;
 [Route("/forecast/windy/")]
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
-    [HttpPut("create")] //POST 
+    [HttpPost("create")] //POST 
     public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
     {
         forecast.SetIdSistema();
@@ -27,7 +27,7 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     }
     
     [HttpDelete("delete/{id}")]
-    public async Task<ActionResult<ResponseClient>> Delete([FromRoute] string id)
+    public async Task<ActionResult<ResponseClient>> Delete([FromRoute] int id)
     {
         ResponseClient response = await forecastService.Delete(id);
         return StatusCode(200, response);

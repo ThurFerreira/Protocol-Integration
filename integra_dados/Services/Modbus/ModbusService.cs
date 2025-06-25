@@ -15,7 +15,7 @@ public class ModbusService
     public static bool ConnectClientModbus(SupervisoryRegistry registry)
     {
         ApiClient.IPAddress = registry.Ip;
-        ApiClient.Port = int.Parse(registry.Porta!);
+        ApiClient.Port = registry.Porta;
         ApiClient.SerialPort = null;
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -53,7 +53,7 @@ public class ModbusService
         if(ApiClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadDiscreteInputs(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+                var serverResponse = ApiClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -82,7 +82,7 @@ public class ModbusService
         if(ApiClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadInputRegisters(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+                var serverResponse = ApiClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -111,7 +111,7 @@ public class ModbusService
         if(ApiClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadCoils(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+                var serverResponse = ApiClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -141,7 +141,7 @@ public class ModbusService
         {
             try
             {
-                var serverResponse = ApiClient.ReadHoldingRegisters(int.Parse(registry.EnderecoInicio), registry.QuantidadeTags);
+                var serverResponse = ApiClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua

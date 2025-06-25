@@ -7,10 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace integra_dados.Controllers;
 
 [ApiController]
-[Route("/supervisory/registry/")]
-public class SupervisoryController(SupervisoryService supervisoryService) : ControllerBase
+[Route("/supervisory/modbus")]
+public class SupervisoryModbusController(SupervisoryService supervisoryService) : ControllerBase
 {
-    [HttpPut("create")]
+    [HttpPost("create")]
     public async Task<ActionResult<ResponseClient>> Create([FromBody] SupervisoryRegistry supervisory)
     {
         supervisory.SetIdSistema();
@@ -37,7 +37,7 @@ public class SupervisoryController(SupervisoryService supervisoryService) : Cont
     }
     
     [HttpDelete("delete/{id}")]
-    public IActionResult DeleteSupervisoryRegistry([FromRoute] string id)
+    public IActionResult DeleteSupervisoryRegistry([FromRoute] int id)
     {
         supervisoryService.Delete(id);
         return StatusCode(StatusCodes.Status200OK, new ResponseClient("Registro deletado com sucesso"));

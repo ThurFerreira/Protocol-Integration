@@ -10,12 +10,11 @@ public class Registry
     [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string? _id { get; set; }
-    public string? Id { get; set; }
+    public int Id { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
     public int Status { get; set; }
     [JsonIgnore]
-    public string? IdSistema { get; set; }
     public string? Nome { get; set; }
     public string? Fonte { get; set; }
     public string? TipoDado { get; set; }
@@ -24,7 +23,7 @@ public class Registry
     public DateTime UltimaAtualizacao { get; set; }
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
-    public string? FreqLeituraSeg { get; set; } //TODO int
+    public int FreqLeituraSeg { get; set; } //TODO int
     
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
@@ -35,8 +34,7 @@ public class Registry
 
     public void SetIdSistema()
     {
-        IdSistema = Util.Util.GenerateRandomNumber().ToString();
-        Id = IdSistema;
+        Id = Util.Util.GenerateRandomNumber();
     }
 
     public bool IsTimeToSendMessage(int freqLeitura)

@@ -13,7 +13,7 @@ public class ForecastService(
     ModbusService modbusService,
     WindyApiService windyService)
 {
-    private static Dictionary<string, ForecastRegistry> registries = new Dictionary<string, ForecastRegistry>();
+    private static Dictionary<int, ForecastRegistry> registries = new Dictionary<int, ForecastRegistry>();
 
     public async Task<ResponseClient> Create(ForecastRegistry forecastRegistry)
     {
@@ -79,7 +79,7 @@ public class ForecastService(
         );
     }
 
-    public async Task<ResponseClient> Delete(string id)
+    public async Task<ResponseClient> Delete(int id)
     {
         bool deleted = await forecastRepository.DeleteById(id);
 
@@ -126,7 +126,7 @@ public class ForecastService(
     ResponseClient GetOne(int idSistema)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.IdSistema.Equals(idSistema));
+            .FirstOrDefault(registry => registry.Value.Id.Equals(idSistema));
 
         return CreateResponseToFoundRegistry(idSistema, foundRegistry.Value);
     }
@@ -157,9 +157,9 @@ public class ForecastService(
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.IdSistema.Equals(supervisoryEdited.IdSistema))
+            if (registry.Id.Equals(supervisoryEdited.Id))
             {
-                registries[registry.IdSistema] = supervisoryEdited;
+                registries[registry.Id] = supervisoryEdited;
             }
         }
     }
@@ -172,7 +172,7 @@ public class ForecastService(
         }
     }
 
-    void DeleteRegisry(string id)
+    void DeleteRegisry(int id)
     {
         registries.Remove(id);
     }
@@ -187,9 +187,9 @@ public class ForecastService(
 
     public void CheckWhetherShouldTriggerBroker(ForecastRegistry registry)
     {
-        if (int.Parse(registry.FreqLeituraMin) > 0)
+        if (registry.FreqLeituraSeg > 0)
         {
-            if (registry.IsTimeToSendMessage(int.Parse(registry.FreqLeituraMin)))
+            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
             {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorForecast(registry);
