@@ -23,9 +23,9 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ResponseClient), (int)HttpStatusCode.OK)]
     [Produces("application/json")]
-    public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int idSistema)
+    public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int id)
     {
-        var responseClient = SupervisoryService.GetOne(idSistema);
+        var responseClient = SupervisoryService.GetOne(id);
         return Ok(responseClient);
     }
     

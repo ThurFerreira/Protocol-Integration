@@ -33,6 +33,15 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
         return Ok(response);
     }
     
+    [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ResponseClient), (int)HttpStatusCode.OK)]
+    [Produces("application/json")]
+    public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int id)
+    {
+        var responseClient = ForecastService.GetOne(id);
+        return Ok(responseClient);
+    }
+    
     [HttpGet("location")]
     public async Task<ActionResult> GetForecastOnLocation(Location location, string varType)
     {
