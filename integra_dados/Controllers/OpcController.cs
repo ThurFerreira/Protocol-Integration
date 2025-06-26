@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
 
+[ApiController]
+[Route("/supervisory/opc/")]
 public class OpcController(OpcService opcService) : ControllerBase
 {
     [HttpPost("create")]
