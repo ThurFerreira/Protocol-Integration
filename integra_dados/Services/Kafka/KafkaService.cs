@@ -58,17 +58,6 @@ public class KafkaService
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(ForecastRegistry registry, int reisterValue)
-    {
-        return new Event1000_1(
-            registry.Id,
-            registry.Nome,
-            0,
-            reisterValue,
-            registry.UltimaAtualizacao
-        );
-    }
-    
     public Event1000_1 CreateBrokerPackage(ForecastRegistry registry, float reisterValue)
     {
         return new Event1000_1(
@@ -87,7 +76,7 @@ public class KafkaService
             ;
             string json = JsonConvert.SerializeObject(pkg);
             DeliveryResult<string, string> result = await _producer.ProduceAsync(topic, new Message<string, string> { Key = "", Value = json} );
-            _logger.LogInformation("Message " + json + $" delivered to {result.TopicPartitionOffset}");
+            // _logger.LogInformation("Message " + json + $" delivered to {result.TopicPartitionOffset}");
         }
         catch (System.Exception ex)
         {

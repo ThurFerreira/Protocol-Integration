@@ -10,7 +10,7 @@ public class HttpService(HttpClient httpClient)
     public async Task<HttpResponseMessage> Post(string url, object body, string token)
     { 
         string json = JsonConvert.SerializeObject(body);
-        Console.WriteLine(json);
+        // Console.WriteLine(json);
         HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
         request.Content = new StringContent(json, Encoding.UTF8, "application/json");
         request.Headers.Add("Authorization", "Bearer " + token);
