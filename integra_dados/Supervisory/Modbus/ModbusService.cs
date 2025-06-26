@@ -1,21 +1,169 @@
 using System.Net;
+using EasyModbus;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Repository;
 using integra_dados.Services.Kafka;
-using integra_dados.Services.Modbus;
 
-namespace integra_dados.Services;
+namespace integra_dados.Services.Modbus;
 
-public class SupervisoryService(
-    IRepository<SupervisoryRegistry> supervisoryRepository,
-    KafkaService kafkaService,
-    ModbusService modbusService)
+public class ModbusService(
+    IRepository<ModbusRegistry> supervisoryRepository,
+    KafkaService kafkaService)
 {
-    private static Dictionary<int, SupervisoryRegistry> registries = new Dictionary<int, SupervisoryRegistry>();
+    public static ModbusClient? ApiClient = new ModbusClient();
+    private static Dictionary<int, ModbusRegistry> registries = new Dictionary<int, ModbusRegistry>();
+
+    public static bool ConnectClientModbus(ModbusRegistry registry)
+    {
+        ApiClient.IPAddress = registry.Ip;
+        ApiClient.Port = registry.Porta;
+        ApiClient.SerialPort = null;
+
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        while (!ApiClient.Connected && stopwatch.ElapsedMilliseconds < 30000)
+        {
+            try
+            {
+                ApiClient.Connect();
+                if (ApiClient.Connected)
+                {
+                    Console.WriteLine("Connected successfully.");
+                    return true;
+                }
+            }
+            catch (System.Exception E)
+            {
+                Console.WriteLine("Failed to connect after multiple attempts. " + E.Message);
+                return false;
+            }
+
+            Thread.Sleep(3000);
+        }
+
+
+        return false;
+    }
+
+    public static bool ReadDiscreteInput(ModbusRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
+            try
+            {
+                var serverResponse = ApiClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return false;
+    }
+    
+    public static int ReadInputRegister(ModbusRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
+            try
+            {
+                var serverResponse = ApiClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return -1;
+    }
+    
+    public static bool ReadCoil(ModbusRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        } 
+        
+        if(ApiClient.Connected) {
+            try
+            {
+                var serverResponse = ApiClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return false;
+    }
+
+    public static int ReadHoldingRegister(ModbusRegistry registry)
+    {
+        if (!ApiClient.Connected)
+        {
+            ConnectClientModbus(registry);
+        }
+
+        if (ApiClient.Connected)
+        {
+            try
+            {
+                var serverResponse = ApiClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+
+                if (serverResponse == null ||
+                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                {
+                    System.Console.WriteLine("No data returned from the Modbus server.");
+                }
+
+                return serverResponse[0];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        return -1;
+    }
 
     // Report _report;
-    public async Task<ResponseClient> Create(SupervisoryRegistry registry)
+    public async Task<ResponseClient> Create(ModbusRegistry registry)
     {
         if (registry.TopicoBroker == null || registry.TopicoBroker.Equals(""))
         {
@@ -39,19 +187,19 @@ public class SupervisoryService(
             "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
 
-    public async Task<ResponseClient> Edit(SupervisoryRegistry supervisoryRegistry)
+    public async Task<ResponseClient> Edit(ModbusRegistry modbusRegistry)
     {
         try
         {
-            SupervisoryRegistry supervisoryFound = await supervisoryRepository.ReplaceOne(supervisoryRegistry);
-            if (supervisoryFound != null)
+            ModbusRegistry modbusFound = await supervisoryRepository.ReplaceOne(modbusRegistry);
+            if (modbusFound != null)
             {
-                ReplaceRegistry(supervisoryFound);
+                ReplaceRegistry(modbusFound);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    supervisoryRegistry,
+                    modbusRegistry,
                     "Registro atualizado com sucesso."
                 );
             }
@@ -60,7 +208,7 @@ public class SupervisoryService(
                 HttpStatusCode.Conflict,
                 false,
                 null,
-                $"Registro com nome '{supervisoryRegistry.Nome}' não foi encontrado."
+                $"Registro com nome '{modbusRegistry.Nome}' não foi encontrado."
             );
         }
         catch (Exception e)
@@ -98,15 +246,15 @@ public class SupervisoryService(
         );
     }
 
-    public void TriggerBroker(List<SupervisoryRegistry> registries)
+    public void TriggerBroker(List<ModbusRegistry> registries)
     {
-        foreach (SupervisoryRegistry supervisoryRegistry in registries.ToList())
+        foreach (ModbusRegistry supervisoryRegistry in registries.ToList())
         {
             CheckWhetherShouldTriggerBroker(supervisoryRegistry);
         }
     }
 
-    public void CheckWhetherShouldTriggerBroker(SupervisoryRegistry registry)
+    public void CheckWhetherShouldTriggerBroker(ModbusRegistry registry)
     {
         if (registry.FreqLeituraSeg > 0)
         {
@@ -118,7 +266,7 @@ public class SupervisoryService(
         }
     }
 
-    private void MonitorSupervisory(SupervisoryRegistry registry)
+    private void MonitorSupervisory(ModbusRegistry registry)
     {
         switch (registry.TipoDado)
         {
@@ -182,12 +330,12 @@ public class SupervisoryService(
         }
     }
 
-    public static void AddRegistry(SupervisoryRegistry registry)
+    public static void AddRegistry(ModbusRegistry registry)
     {
         registries.Add(registry.Id, registry);
     }
 
-    public static List<SupervisoryRegistry> GetRegistries()
+    public List<ModbusRegistry> GetRegistries()
     {
         return registries.Values.ToList(); //buscar no banco isso aqui é muito burro
     }
@@ -222,18 +370,18 @@ public class SupervisoryService(
         }
     }
 
-    public static void ReplaceRegistry(SupervisoryRegistry supervisoryEdited)
+    public static void ReplaceRegistry(ModbusRegistry modbusEdited)
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.Id.Equals(supervisoryEdited.Id))
+            if (registry.Id.Equals(modbusEdited.Id))
             {
-                registries[registry.Id] = supervisoryEdited;
+                registries[registry.Id] = modbusEdited;
             }
         }
     }
 
-    public static void StartRegistries(List<SupervisoryRegistry> updateRegistries)
+    public static void StartRegistries(List<ModbusRegistry> updateRegistries)
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {

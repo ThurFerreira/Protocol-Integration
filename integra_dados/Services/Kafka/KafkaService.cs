@@ -25,7 +25,7 @@ public class KafkaService
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
 
-    public Event1000_1 CreateBrokerPackage(SupervisoryRegistry registry, int reisterValue)
+    public Event1000_1 CreateBrokerPackage(ModbusRegistry registry, int reisterValue)
     {
         return new Event1000_1(
             registry.Id,
@@ -36,7 +36,7 @@ public class KafkaService
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(SupervisoryRegistry registry, bool reisterValue)
+    public Event1000_1 CreateBrokerPackage(ModbusRegistry registry, bool reisterValue)
     {
         return new Event1000_1(
             registry.Id,

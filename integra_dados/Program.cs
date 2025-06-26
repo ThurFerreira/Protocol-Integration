@@ -35,11 +35,11 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 builder.Services.AddMongoCollection<ForecastRegistry>();
-builder.Services.AddMongoCollection<SupervisoryRegistry>();
+builder.Services.AddMongoCollection<ModbusRegistry>();
 
-builder.Services.AddScoped<IRepository<SupervisoryRegistry>, SupervisoryRepository>();
+builder.Services.AddScoped<IRepository<ModbusRegistry>, ModbusRepository>();
 builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
-builder.Services.AddScoped<SupervisoryService>();
+builder.Services.AddScoped<ModbusService>();
 builder.Services.AddScoped<ForecastService>();
 
 builder.Services.AddSingleton<Report>();

@@ -1,5 +1,6 @@
 using integra_dados.Models;
 using integra_dados.Repository;
+using integra_dados.Services.Modbus;
 
 namespace integra_dados.Services;
 
@@ -10,9 +11,9 @@ public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
         // Inicializa o RegistryManager uma vez no início
         using (var supervisoryScope = serviceProvider.CreateScope())
         {
-            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<SupervisoryRegistry>>();
+            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<ModbusRegistry>>();
             var allRegistries = await repository.FindAll();
-            SupervisoryService.StartRegistries(allRegistries);
+            ModbusService.StartRegistries(allRegistries);
         }
         
         using (var forecastScope = serviceProvider.CreateScope())
@@ -29,8 +30,8 @@ public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
             {
                 using (var scope = serviceProvider.CreateScope())
                 {
-                    var supervisoryService = scope.ServiceProvider.GetRequiredService<SupervisoryService>();
-                    supervisoryService.TriggerBroker(SupervisoryService.GetRegistries());
+                    var modbusService = scope.ServiceProvider.GetRequiredService<ModbusService>();
+                    modbusService.TriggerBroker(modbusService.GetRegistries());
                 }
                 
                 using (var scope = serviceProvider.CreateScope())

@@ -1,7 +1,7 @@
 namespace integra_dados.Models;
 
 [BsonCollection("SupervisoryRegistry")]
-public class SupervisoryRegistry : Registry
+public class ModbusRegistry : Registry
 {
     public string? Protocolo { get; set; }
 

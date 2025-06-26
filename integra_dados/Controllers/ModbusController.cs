@@ -2,20 +2,21 @@ using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Services;
+using integra_dados.Services.Modbus;
 using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
 
 [ApiController]
 [Route("/supervisory/modbus")]
-public class SupervisoryModbusController(SupervisoryService supervisoryService) : ControllerBase
+public class ModbusController(ModbusService modbusService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] SupervisoryRegistry supervisory)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusRegistry modbus)
     {
-        supervisory.SetIdSistema();
+        modbus.SetIdSistema();
 
-        var responseFromRegistry = await supervisoryService.Create(supervisory);
+        var responseFromRegistry = await modbusService.Create(modbus);
 
         return Ok(responseFromRegistry);
     }
@@ -25,28 +26,28 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
     [Produces("application/json")]
     public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int id)
     {
-        var responseClient = SupervisoryService.GetOne(id);
+        var responseClient = ModbusService.GetOne(id);
         return Ok(responseClient);
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] SupervisoryRegistry supervisory)
+    public async Task<ActionResult> EditSupervisory([FromBody] ModbusRegistry modbus)
     {
-        ResponseClient responseFromEdition = await supervisoryService.Edit(supervisory);
+        ResponseClient responseFromEdition = await modbusService.Edit(modbus);
         return Ok(responseFromEdition);
     }
     
     [HttpDelete("delete/{id}")]
     public IActionResult DeleteSupervisoryRegistry([FromRoute] int id)
     {
-        supervisoryService.Delete(id);
+        modbusService.Delete(id);
         return Ok(new ResponseClient("Registro deletado com sucesso"));
     }
 
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<SupervisoryRegistry> registries = SupervisoryService.GetRegistries();
+        List<ModbusRegistry> registries = modbusService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
@@ -60,7 +61,7 @@ public class SupervisoryModbusController(SupervisoryService supervisoryService) 
     [HttpGet("variable/{id}/all")]
     public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
     {
-        List<SupervisoryRegistry> registries = SupervisoryService.GetRegistries();
+        List<ModbusRegistry> registries = modbusService.GetRegistries();
 
         var responseClient = new ResponseClient(
             HttpStatusCode.OK,
