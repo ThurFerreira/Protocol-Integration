@@ -6,9 +6,11 @@ namespace integra_dados.Repository;
 
 public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) : IRepository<OpcRegistry>
 {
-    public Task<List<OpcRegistry>> FindByName(string name)
+    public async Task<List<OpcRegistry>> FindByName(string name)
     {
-        throw new NotImplementedException();
+        var filter = Builders<OpcRegistry>.Filter.Eq(s => s.Nome, name);
+        using var cursor = await opcRegistryCollection.FindAsync(filter);
+        return cursor.ToList();
     }
 
     public Task<OpcRegistry> FindOneByName(string name)
