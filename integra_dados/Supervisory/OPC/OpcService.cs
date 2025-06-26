@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
@@ -5,6 +6,10 @@ using integra_dados.Models.SupervisoryModel;
 using integra_dados.Repository;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
+using integra_dados.Services.Notifier;
+using MongoDB.Bson;
+using Opc.UaFx;
+using Opc.UaFx.Client;
 
 namespace integra_dados.Supervisory.OPC;
 
@@ -12,8 +17,87 @@ public class OpcService(
     IRepository<OpcRegistry> opcRepository,
     KafkaService kafkaService)
 {
-    
     private static Dictionary<int, OpcRegistry> registries = new Dictionary<int, OpcRegistry>();
+    public static OpcClient? OpcClient = new OpcClient();
+    public static Report _report;
+
+    public static ConcurrentDictionary<string, OpcClient> clientesConectados =
+        new ConcurrentDictionary<string, OpcClient>();
+
+    public static bool ConnectClientOpc(OpcRegistry registry)
+    {
+        int tentativas = 0;
+        string link = registry.LinkConexao;
+        if (!clientesConectados.ContainsKey(link))
+        {
+            OpcClient = new OpcClient(registry.LinkConexao);
+            while (OpcClient.State != OpcClientState.Connected || tentativas < 5)
+            {
+                try
+                {
+                    OpcClient.Connect();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    tentativas++;
+                    Task.Delay(7000).Wait();
+                    // if (tentativas == 4)
+                    // {
+                    //     _report.LightException(Status.RUNNING);
+                    //
+                    //     var pacoteFalho = grupo.FirstOrDefault();
+                    //     if (pacoteFalho != null)
+                    //     {
+                    //         RemoverIed(pacoteFalho.CodId);
+                    //     }
+                    // }
+                }
+            }
+        }
+
+        if (OpcClient.State == OpcClientState.Connected)
+        {
+            clientesConectados[link] = OpcClient;
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public List<OpcValue> ReadNodes(OpcRegistry opcRegistry)
+    {
+        try
+        {
+            if (OpcClient == null || OpcClient.State != OpcClientState.Connected)
+            {
+                ConnectClientOpc(opcRegistry);
+            }
+
+            if (OpcClient.State == OpcClientState.Connected)
+            {
+                OpcReadNode[] readNode = new OpcReadNode[opcRegistry.NodeAddress.Count];
+                for (int i = 0; i < opcRegistry.NodeAddress.Count; i++)
+                {
+                    readNode[i] = new OpcReadNode(opcRegistry.NodeAddress[i]);
+                }
+
+                List<OpcValue> resultadoBusca = OpcClient.ReadNodes(readNode).ToList();
+
+                if (resultadoBusca.Count > 0)
+                {
+                    return resultadoBusca;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        return null;
+    }
 
     public async Task<ResponseClient> Create(OpcRegistry registry)
     {
@@ -39,19 +123,19 @@ public class OpcService(
             "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
 
-    public async Task<ResponseClient> Edit(OpcRegistry modbusRegistry)
+    public async Task<ResponseClient> Edit(OpcRegistry opcRegistry)
     {
         try
         {
-            OpcRegistry modbusFound = await opcRepository.ReplaceOne(modbusRegistry);
-            if (modbusFound != null)
+            OpcRegistry opcFound = await opcRepository.ReplaceOne(opcRegistry);
+            if (opcFound != null)
             {
-                ReplaceRegistry(modbusFound);
+                ReplaceRegistry(opcFound);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    modbusRegistry,
+                    opcRegistry,
                     "Registro atualizado com sucesso."
                 );
             }
@@ -60,7 +144,7 @@ public class OpcService(
                 HttpStatusCode.Conflict,
                 false,
                 null,
-                $"Registro com nome '{modbusRegistry.Nome}' não foi encontrado."
+                $"Registro com nome '{opcRegistry.Nome}' não foi encontrado."
             );
         }
         catch (Exception e)
@@ -90,13 +174,14 @@ public class OpcService(
                 "Registro de previsão deletado com sucesso."
             );
         }
-        
+
         return new ResponseClient(
             HttpStatusCode.Conflict,
             false,
             "Registro de previsão com id '" + id + "' não foi encontrado."
         );
     }
+
     public void TriggerBroker(List<OpcRegistry> registries)
     {
         foreach (OpcRegistry supervisoryRegistry in registries.ToList())
@@ -111,7 +196,6 @@ public class OpcService(
         {
             if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
             {
-                //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorOpc(registry);
             }
         }
@@ -119,6 +203,13 @@ public class OpcService(
 
     private void MonitorOpc(OpcRegistry registry)
     {
+        Event1000_1 brokerPackage;
+        List<OpcValue> opcResponse = ReadNodes(registry);
+        foreach (var res in opcResponse)
+        {
+            brokerPackage = kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
+            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+        }
     }
 
     public static void AddRegistry(OpcRegistry registry)

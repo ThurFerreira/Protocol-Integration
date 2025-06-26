@@ -32,9 +32,9 @@ public class OpcController(OpcService opcService) : ControllerBase
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry modbus)
+    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry opcRegistry)
     {
-        ResponseClient responseFromEdition = await opcService.Edit(modbus);
+        ResponseClient responseFromEdition = await opcService.Edit(opcRegistry);
         return Ok(responseFromEdition);
     }
     
