@@ -1,4 +1,5 @@
 using integra_dados.Models;
+using integra_dados.Models.SupervisoryModel;
 using MongoDB.Driver;
 
 namespace integra_dados.Repository;
@@ -15,9 +16,10 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
         throw new NotImplementedException();
     }
 
-    public Task<OpcRegistry> Save(OpcRegistry document)
+    public async Task<OpcRegistry> Save(OpcRegistry document)
     {
-        throw new NotImplementedException();
+        await opcRegistryCollection.InsertOneAsync(document);
+        return document;
     }
 
     public Task<OpcRegistry> FindById(int idSistema)
@@ -25,14 +27,17 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
         throw new NotImplementedException();
     }
 
-    public Task<bool> DeleteById(int id)
+    public async Task<bool> DeleteById(int id)
     {
-        throw new NotImplementedException();
+        var filter = Builders<OpcRegistry>.Filter.Eq(x => x.Id, id);
+        var result = await opcRegistryCollection.DeleteOneAsync(filter);
+        return result.DeletedCount > 0;
     }
 
-    public Task<List<OpcRegistry>> FindAll()
+    public async Task<List<OpcRegistry>> FindAll()
     {
-        throw new NotImplementedException();
+        var result = await opcRegistryCollection.FindAsync(FilterDefinition<OpcRegistry>.Empty);
+        return await result.ToListAsync();
     }
 
     public Task<OpcRegistry> FindByNameAndVarType(string name, string varType)
@@ -40,8 +45,16 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
         throw new NotImplementedException();
     }
 
-    public Task<OpcRegistry> ReplaceOne(OpcRegistry document)
+    public async Task<OpcRegistry> ReplaceOne(OpcRegistry document)
     {
-        throw new NotImplementedException();
+        var result = await opcRegistryCollection.ReplaceOneAsync(
+            f => f.Id == document.Id,
+            document
+        );
+
+        if (result.ModifiedCount == 0)
+            return null;
+
+        return document;
     }
 }

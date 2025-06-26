@@ -1,6 +1,8 @@
 using integra_dados.Models;
+using integra_dados.Models.SupervisoryModel;
 using integra_dados.Repository;
 using integra_dados.Services.Modbus;
+using integra_dados.Supervisory.OPC;
 
 namespace integra_dados.Services;
 
@@ -22,6 +24,13 @@ public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
             var allRegistries = await repository.FindAll();
             ForecastService.StartRegistries(allRegistries);
         }
+        
+        using (var forecastScope = serviceProvider.CreateScope())
+        {
+            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<OpcRegistry>>();
+            var allRegistries = await repository.FindAll();
+            OpcService.StartRegistries(allRegistries);
+        }
 
         // Loop principal do serviço
         while (!stoppingToken.IsCancellationRequested)
@@ -36,8 +45,14 @@ public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
                 
                 using (var scope = serviceProvider.CreateScope())
                 {
-                    var supervisoryService = scope.ServiceProvider.GetRequiredService<ForecastService>();
-                    supervisoryService.TriggerBroker(ForecastService.GetRegistries());
+                    var forecastService = scope.ServiceProvider.GetRequiredService<ForecastService>();
+                    forecastService.TriggerBroker(ForecastService.GetRegistries());
+                }
+                
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var opcService = scope.ServiceProvider.GetRequiredService<OpcService>();
+                    opcService.TriggerBroker(opcService.GetRegistries());
                 }
             }
             catch (Exception ex)

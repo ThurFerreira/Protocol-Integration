@@ -1,10 +1,12 @@
 using integra_dados.Config;
 using integra_dados.Models;
+using integra_dados.Models.SupervisoryModel;
 using integra_dados.Repository;
 using integra_dados.Services;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
+using integra_dados.Supervisory.OPC;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -13,14 +15,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Http Client
 builder.Services.AddHttpClient<HttpService>();
 
-// Modbus
-builder.Services.AddSingleton<ModbusService>();
+// Http server config
+var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
+builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(serverSettings.Port); });
 
 // Kafka
 builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("Kafka"));
 builder.Services.AddSingleton<KafkaService>();
 
-// MongoDB
+// MongoDB Configuration
 builder.Services.Configure<MongoDbConfig>(
     builder.Configuration.GetSection("MongoDb")
 );
@@ -34,21 +37,29 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
     return new MongoClient(settings.ConnectionString);
 });
 
+// MongoDB Collections
 builder.Services.AddMongoCollection<ForecastRegistry>();
 builder.Services.AddMongoCollection<ModbusRegistry>();
+builder.Services.AddMongoCollection<OpcRegistry>();
 
+// Modbus
 builder.Services.AddScoped<IRepository<ModbusRegistry>, ModbusRepository>();
-builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
 builder.Services.AddScoped<ModbusService>();
-builder.Services.AddScoped<ForecastService>();
 
+// Windy Forecast
+builder.Services.AddSingleton<WindyApiService>();
+builder.Services.AddScoped<ForecastService>();
+builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
+
+// OPC
+builder.Services.AddScoped<OpcService>();
+builder.Services.AddScoped<IRepository<OpcRegistry>, OpcRepository>();
+
+// Notifier Dependencies
 builder.Services.AddSingleton<Report>();
 builder.Services.AddSingleton<ExceptionInfo>();
 
-// Http server config
-var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerConfig>();
-builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(serverSettings.Port); });
-
+// Cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowOtherApp", policy =>
@@ -68,17 +79,14 @@ builder.Services.AddHostedService<Scheduler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Windy Service
-builder.Services.AddSingleton<WindyApiService>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-app.UseSwagger();
-app.UseSwaggerUI();
-// }
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseCors("AllowOtherApp");
 
