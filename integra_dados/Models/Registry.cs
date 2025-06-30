@@ -24,6 +24,7 @@ public class Registry
     public int FreqLeituraSeg { get; set; }
     public string? Ip { get; set; }
     public int Porta { get; set; }
+    public Protocol? Protocol { get; set; }
     
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
