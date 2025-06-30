@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace integra_dados.Repository;
 
-public static class MongoServiceExtensions
+public static class MongoServiceCollectionExtensions
 {
     public static IServiceCollection AddMongoCollection<T>(this IServiceCollection services)
     {
