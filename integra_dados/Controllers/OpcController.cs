@@ -9,15 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace integra_dados.Controllers;
 
 [ApiController]
-[Route("/supervisory/opc/")]
+[Route("/supervisory/opcua/")]
 public class OpcController(OpcService opcService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry modbus)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry opcRegistry)
     {
-        modbus.SetIdSistema();
+        opcRegistry.SetIdSistema();
+        opcRegistry.SetConnectionLink();
 
-        var responseFromRegistry = await opcService.Create(modbus);
+        var responseFromRegistry = await opcService.Create(opcRegistry);
 
         return Ok(responseFromRegistry);
     }
@@ -32,9 +33,10 @@ public class OpcController(OpcService opcService) : ControllerBase
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry modbus)
+    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry opcRegistry)
     {
-        ResponseClient responseFromEdition = await opcService.Edit(modbus);
+        opcRegistry.SetConnectionLink();
+        ResponseClient responseFromEdition = await opcService.Edit(opcRegistry);
         return Ok(responseFromEdition);
     }
     

@@ -11,22 +11,22 @@ public class ModbusService(
     IRepository<ModbusRegistry> supervisoryRepository,
     KafkaService kafkaService)
 {
-    public static ModbusClient? ApiClient = new ModbusClient();
+    public static ModbusClient? ModbusClient = new ModbusClient();
     private static Dictionary<int, ModbusRegistry> registries = new Dictionary<int, ModbusRegistry>();
 
     public static bool ConnectClientModbus(ModbusRegistry registry)
     {
-        ApiClient.IPAddress = registry.Ip;
-        ApiClient.Port = registry.Porta;
-        ApiClient.SerialPort = null;
+        ModbusClient.IPAddress = registry.Ip;
+        ModbusClient.Port = registry.Porta;
+        ModbusClient.SerialPort = null;
 
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        while (!ApiClient.Connected && stopwatch.ElapsedMilliseconds < 30000)
+        while (!ModbusClient.Connected && stopwatch.ElapsedMilliseconds < 30000)
         {
             try
             {
-                ApiClient.Connect();
-                if (ApiClient.Connected)
+                ModbusClient.Connect();
+                if (ModbusClient.Connected)
                 {
                     Console.WriteLine("Connected successfully.");
                     return true;
@@ -47,15 +47,15 @@ public class ModbusService(
 
     public static bool ReadDiscreteInput(ModbusRegistry registry)
     {
-        if (!ApiClient.Connected)
+        if (!ModbusClient.Connected)
         {
             ConnectClientModbus(registry);
         } 
         
-        if(ApiClient.Connected) {
+        if(ModbusClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
+                var serverResponse = ModbusClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -76,15 +76,15 @@ public class ModbusService(
     
     public static int ReadInputRegister(ModbusRegistry registry)
     {
-        if (!ApiClient.Connected)
+        if (!ModbusClient.Connected)
         {
             ConnectClientModbus(registry);
         } 
         
-        if(ApiClient.Connected) {
+        if(ModbusClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                var serverResponse = ModbusClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -105,15 +105,15 @@ public class ModbusService(
     
     public static bool ReadCoil(ModbusRegistry registry)
     {
-        if (!ApiClient.Connected)
+        if (!ModbusClient.Connected)
         {
             ConnectClientModbus(registry);
         } 
         
-        if(ApiClient.Connected) {
+        if(ModbusClient.Connected) {
             try
             {
-                var serverResponse = ApiClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
+                var serverResponse = ModbusClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -134,16 +134,16 @@ public class ModbusService(
 
     public static int ReadHoldingRegister(ModbusRegistry registry)
     {
-        if (!ApiClient.Connected)
+        if (!ModbusClient.Connected)
         {
             ConnectClientModbus(registry);
         }
 
-        if (ApiClient.Connected)
+        if (ModbusClient.Connected)
         {
             try
             {
-                var serverResponse = ApiClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                var serverResponse = ModbusClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse == null ||
                     serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
@@ -260,7 +260,6 @@ public class ModbusService(
         {
             if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
             {
-                //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
                 MonitorSupervisory(registry);
             }
         }
@@ -271,7 +270,7 @@ public class ModbusService(
         switch (registry.TipoDado)
         {
             case "discreteInput":
-                var registerValueStatus = ModbusService.ReadDiscreteInput(registry);
+                var registerValueStatus = ReadDiscreteInput(registry);
                 registry.UpdateRegistry(registerValueStatus);
                 ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueStatus))
@@ -285,7 +284,7 @@ public class ModbusService(
 
                 break;
             case "inputRegister":
-                var registerValueIntRegister = ModbusService.ReadInputRegister(registry);
+                var registerValueIntRegister = ReadInputRegister(registry);
                 registry.UpdateRegistry(registerValueIntRegister);
                 ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueIntRegister))
@@ -300,7 +299,7 @@ public class ModbusService(
 
                 break;
             case "coil":
-                var registerValueCoil = ModbusService.ReadCoil(registry);
+                var registerValueCoil = ReadCoil(registry);
                 registry.UpdateRegistry(registerValueCoil);
                 ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueCoil))
@@ -314,7 +313,7 @@ public class ModbusService(
 
                 break;
             case "holdingRegister":
-                var registerValueHolding = ModbusService.ReadHoldingRegister(registry);
+                var registerValueHolding = ReadHoldingRegister(registry);
                 registry.UpdateRegistry(registerValueHolding);
                 ReplaceRegistry(registry);
                 if (registry.ShouldSendToBroker(registerValueHolding))

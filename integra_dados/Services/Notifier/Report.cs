@@ -43,7 +43,8 @@ public class Report : ICloneable
     }
 
     /// Registra uma exceção leve
-    public void LightException()
+    /// <param name="running"></param>
+    public void LightException(Status running)
     {
         Last = DateTime.UtcNow;
         ExceptionInfo.IncrementLight();
