@@ -49,14 +49,22 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
 
     public async Task<OpcRegistry> ReplaceOne(OpcRegistry document)
     {
+        var existing = await opcRegistryCollection
+            .Find(x => x.CodeId == document.CodeId)
+            .FirstOrDefaultAsync();
+
+        if (existing is null)
+            return null;
+
+        // Copia o _id antigo para evitar erro
+        document._Id = existing._Id;
+
+        // Substitui o documento
         var result = await opcRegistryCollection.ReplaceOneAsync(
-            f => f.CodeId == document.CodeId,
+            x => x.CodeId == document.CodeId,
             document
         );
 
-        if (result.ModifiedCount == 0)
-            return null;
-
-        return document;
+        return result.MatchedCount > 0 ? document : null;
     }
 }

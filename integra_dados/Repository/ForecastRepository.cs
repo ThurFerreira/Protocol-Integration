@@ -56,14 +56,22 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
 
     public async Task<ForecastRegistry> ReplaceOne(ForecastRegistry document)
     {
+        var existing = await forecastRegistryCollection
+            .Find(x => x.CodeId == document.CodeId)
+            .FirstOrDefaultAsync();
+
+        if (existing is null)
+            return null;
+
+        // Copia o _id antigo para evitar erro
+        document._Id = existing._Id;
+
+        // Substitui o documento
         var result = await forecastRegistryCollection.ReplaceOneAsync(
-            f => f.CodeId == document.CodeId, 
+            x => x.CodeId == document.CodeId,
             document
         );
 
-        if (result.MatchedCount == 0)
-            return null;
-        
-        return document;
+        return result.MatchedCount > 0 ? document : null;
     }
 }

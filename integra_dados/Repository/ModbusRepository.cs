@@ -61,14 +61,22 @@ public class ModbusRepository(IMongoCollection<ModbusRegistry> modbusRegistryCol
 
     public async Task<ModbusRegistry> ReplaceOne(ModbusRegistry document)
     {
+        var existing = await modbusRegistryCollection
+            .Find(x => x.CodeId == document.CodeId)
+            .FirstOrDefaultAsync();
+
+        if (existing is null)
+            return null;
+
+        // Copia o _id antigo para evitar erro
+        document._Id = existing._Id;
+
+        // Substitui o documento
         var result = await modbusRegistryCollection.ReplaceOneAsync(
-            f => f.CodeId == document.CodeId, 
+            x => x.CodeId == document.CodeId,
             document
         );
 
-        if (result.ModifiedCount == 0)
-            return null;
-        
-        return document;
+        return result.MatchedCount > 0 ? document : null;
     }
 }

@@ -1,8 +1,6 @@
 using System.Net;
-using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Models.SupervisoryModel;
-using integra_dados.Services.Modbus;
 using integra_dados.Supervisory.OPC;
 using Microsoft.AspNetCore.Mvc;
 

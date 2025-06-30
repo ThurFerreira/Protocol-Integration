@@ -7,7 +7,8 @@ namespace integra_dados.Models;
 public class Registry
 {
     [BsonId]
-    public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
+    [BsonIgnoreIfDefault]
+    public ObjectId _Id { get; set; } = ObjectId.GenerateNewId();
     public int CodeId { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
