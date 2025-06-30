@@ -6,6 +6,8 @@ namespace integra_dados.Models;
 
 public class Registry
 {
+    [BsonId]
+    public ObjectId? _Id { get; set; }
     [JsonIgnore]
     public int Id { get; set; }
     [JsonIgnore]
@@ -20,7 +22,9 @@ public class Registry
     public DateTime UltimaAtualizacao { get; set; }
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
-    public int FreqLeituraSeg { get; set; } //TODO int
+    public int FreqLeituraSeg { get; set; }
+    public string? Ip { get; set; }
+    public int Porta { get; set; }
     
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient

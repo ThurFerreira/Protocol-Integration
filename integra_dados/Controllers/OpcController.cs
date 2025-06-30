@@ -13,11 +13,12 @@ namespace integra_dados.Controllers;
 public class OpcController(OpcService opcService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry modbus)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry opcRegistry)
     {
-        modbus.SetIdSistema();
+        opcRegistry.SetIdSistema();
+        opcRegistry.SetConnectionLink();
 
-        var responseFromRegistry = await opcService.Create(modbus);
+        var responseFromRegistry = await opcService.Create(opcRegistry);
 
         return Ok(responseFromRegistry);
     }
@@ -34,6 +35,7 @@ public class OpcController(OpcService opcService) : ControllerBase
     [HttpPut("edit")]
     public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry opcRegistry)
     {
+        opcRegistry.SetConnectionLink();
         ResponseClient responseFromEdition = await opcService.Edit(opcRegistry);
         return Ok(responseFromEdition);
     }
