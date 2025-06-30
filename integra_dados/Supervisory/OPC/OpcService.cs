@@ -15,23 +15,24 @@ namespace integra_dados.Supervisory.OPC;
 
 public class OpcService(
     IRepository<OpcRegistry> opcRepository,
-    KafkaService kafkaService)
+    KafkaService kafkaService,
+    Report report)
 {
     private static Dictionary<int, OpcRegistry> registries = new Dictionary<int, OpcRegistry>();
     public static OpcClient? OpcClient = new OpcClient();
-    public static Report _report;
 
     public static ConcurrentDictionary<string, OpcClient> clientesConectados =
         new ConcurrentDictionary<string, OpcClient>();
 
-    public static bool ConnectClientOpc(OpcRegistry registry)
+    public void ConnectClientOpc(OpcRegistry registry)
     {
         int tentativas = 0;
+        // string link = "opc.tcp://10.3.195.224:4840";
         string link = registry.LinkConexao;
         if (!clientesConectados.ContainsKey(link))
         {
-            OpcClient = new OpcClient(registry.LinkConexao);
-            while (OpcClient.State != OpcClientState.Connected || tentativas < 5)
+            OpcClient = new OpcClient(link);
+            while (tentativas < 5)
             {
                 try
                 {
@@ -41,17 +42,8 @@ public class OpcService(
                 catch (Exception ex)
                 {
                     tentativas++;
-                    Task.Delay(7000).Wait();
-                    // if (tentativas == 4)
-                    // {
-                    //     _report.LightException(Status.RUNNING);
-                    //
-                    //     var pacoteFalho = grupo.FirstOrDefault();
-                    //     if (pacoteFalho != null)
-                    //     {
-                    //         RemoverIed(pacoteFalho.CodId);
-                    //     }
-                    // }
+                    Task.Delay(5000).Wait();
+                    Console.WriteLine("Client opc failed to connect");
                 }
             }
         }
@@ -59,10 +51,8 @@ public class OpcService(
         if (OpcClient.State == OpcClientState.Connected)
         {
             clientesConectados[link] = OpcClient;
-            return true;
         }
 
-        return false;
     }
 
 
@@ -90,13 +80,18 @@ public class OpcService(
                     return resultadoBusca;
                 }
             }
+            else
+            {
+                report.LightException(Status.NOT_CONNECTED);
+                return null;
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
 
-        return null;
+        return new List<OpcValue>();
     }
 
     public async Task<ResponseClient> Create(OpcRegistry registry)
@@ -205,10 +200,13 @@ public class OpcService(
     {
         Event1000_1 brokerPackage;
         List<OpcValue> opcResponse = ReadNodes(registry);
-        foreach (var res in opcResponse)
+        if (opcResponse != null)
         {
-            brokerPackage = kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
-            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+            foreach (var res in opcResponse)
+            {
+                brokerPackage = kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
+                kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+            }
         }
     }
 

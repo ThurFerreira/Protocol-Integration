@@ -2,11 +2,12 @@ using integra_dados.Models;
 using integra_dados.Models.SupervisoryModel;
 using integra_dados.Repository;
 using integra_dados.Services.Modbus;
+using integra_dados.Services.Notifier;
 using integra_dados.Supervisory.OPC;
 
 namespace integra_dados.Services;
 
-public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
+public class Scheduler(IServiceProvider serviceProvider, Report report) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -57,6 +58,7 @@ public class Scheduler(IServiceProvider serviceProvider) : BackgroundService
             }
             catch (Exception ex)
             {
+                report.ModerateException(Status.ERROR);
                 Console.WriteLine("[ERROR]: SupervisoryService " + ex);
             }
 
