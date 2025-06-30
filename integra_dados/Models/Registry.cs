@@ -7,8 +7,8 @@ namespace integra_dados.Models;
 public class Registry
 {
     [BsonId]
-    [JsonIgnore]
-    public int Id { get; set; }
+    public ObjectId Id { get; set; } = ObjectId.GenerateNewId();
+    public int CodeId { get; set; }
     [JsonIgnore]
     public string? Uri { get; set; }
     public StatusVariable? Status { get; set; }
@@ -35,7 +35,7 @@ public class Registry
 
     public void SetIdSistema()
     {
-        Id = Util.Util.GenerateRandomNumber();
+        CodeId = Util.Util.GenerateRandomNumber();
     }
 
     public bool IsTimeToSendMessage(int freqLeitura)

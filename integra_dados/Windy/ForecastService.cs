@@ -115,7 +115,7 @@ public class ForecastService(
 
     void AddRegistry(ForecastRegistry registry)
     {
-        registries.Add(registry.Id, registry);
+        registries.Add(registry.CodeId, registry);
     }
 
     public static List<ForecastRegistry> GetRegistries()
@@ -126,7 +126,7 @@ public class ForecastService(
     public static ResponseClient GetOne(int id)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.Id.Equals(id));
+            .FirstOrDefault(registry => registry.Value.CodeId.Equals(id));
 
         return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
@@ -157,9 +157,9 @@ public class ForecastService(
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.Id.Equals(supervisoryEdited.Id))
+            if (registry.CodeId.Equals(supervisoryEdited.CodeId))
             {
-                registries[registry.Id] = supervisoryEdited;
+                registries[registry.CodeId] = supervisoryEdited;
             }
         }
     }
@@ -168,7 +168,7 @@ public class ForecastService(
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {
-            registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
+            registries.Add(supervisoryRegistry.CodeId, supervisoryRegistry);
         }
     }
 

@@ -33,14 +33,14 @@ public class ModbusRepository(IMongoCollection<ModbusRegistry> modbusRegistryCol
 
     public async Task<ModbusRegistry> FindById(int id)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(s => s.Id, id);
+        var filter = Builders<ModbusRegistry>.Filter.Eq(s => s.CodeId, id);
         using var cursor = await modbusRegistryCollection.FindAsync(filter);
         return await cursor.FirstOrDefaultAsync();
     }
 
     public async Task<bool> DeleteById(int id)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(x => x.Id, id);
+        var filter = Builders<ModbusRegistry>.Filter.Eq(x => x.CodeId, id);
         var result = await modbusRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
@@ -62,7 +62,7 @@ public class ModbusRepository(IMongoCollection<ModbusRegistry> modbusRegistryCol
     public async Task<ModbusRegistry> ReplaceOne(ModbusRegistry document)
     {
         var result = await modbusRegistryCollection.ReplaceOneAsync(
-            f => f.Id == document.Id, 
+            f => f.CodeId == document.CodeId, 
             document
         );
 

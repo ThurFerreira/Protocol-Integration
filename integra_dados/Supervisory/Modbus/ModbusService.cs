@@ -331,7 +331,7 @@ public class ModbusService(
 
     public static void AddRegistry(ModbusRegistry registry)
     {
-        registries.Add(registry.Id, registry);
+        registries.Add(registry.CodeId, registry);
     }
 
     public List<ModbusRegistry> GetRegistries()
@@ -342,7 +342,7 @@ public class ModbusService(
     public static ResponseClient GetOne(int id)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.Id.Equals(id));
+            .FirstOrDefault(registry => registry.Value.CodeId.Equals(id));
 
         return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
@@ -373,9 +373,9 @@ public class ModbusService(
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.Id.Equals(modbusEdited.Id))
+            if (registry.CodeId.Equals(modbusEdited.CodeId))
             {
-                registries[registry.Id] = modbusEdited;
+                registries[registry.CodeId] = modbusEdited;
             }
         }
     }
@@ -384,7 +384,7 @@ public class ModbusService(
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {
-            registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
+            registries.Add(supervisoryRegistry.CodeId, supervisoryRegistry);
         }
     }
 

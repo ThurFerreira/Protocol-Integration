@@ -214,7 +214,7 @@ public class OpcService(
 
     public static void AddRegistry(OpcRegistry registry)
     {
-        registries.Add(registry.Id, registry);
+        registries.Add(registry.CodeId, registry);
     }
 
     public List<OpcRegistry> GetRegistries()
@@ -225,7 +225,7 @@ public class OpcService(
     public static ResponseClient GetOne(int id)
     {
         var foundRegistry = registries
-            .FirstOrDefault(registry => registry.Value.Id.Equals(id));
+            .FirstOrDefault(registry => registry.Value.CodeId.Equals(id));
 
         return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
@@ -256,9 +256,9 @@ public class OpcService(
     {
         foreach (var registry in registries.Values.ToList())
         {
-            if (registry.Id.Equals(modbusEdited.Id))
+            if (registry.CodeId.Equals(modbusEdited.CodeId))
             {
-                registries[registry.Id] = modbusEdited;
+                registries[registry.CodeId] = modbusEdited;
             }
         }
     }
@@ -267,7 +267,7 @@ public class OpcService(
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {
-            registries.Add(supervisoryRegistry.Id, supervisoryRegistry);
+            registries.Add(supervisoryRegistry.CodeId, supervisoryRegistry);
         }
     }
 

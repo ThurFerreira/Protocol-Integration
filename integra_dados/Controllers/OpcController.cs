@@ -28,7 +28,7 @@ public class OpcController(OpcService opcService) : ControllerBase
     [Produces("application/json")]
     public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int id)
     {
-        var responseClient = ModbusService.GetOne(id);
+        var responseClient = OpcService.GetOne(id);
         return Ok(responseClient);
     }
     

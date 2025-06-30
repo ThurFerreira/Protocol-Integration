@@ -28,7 +28,7 @@ public class KafkaService
     public Event1000_1 CreateBrokerPackage(Registry registry, int reisterValue)
     {
         return new Event1000_1(
-            registry.Id,
+            registry.CodeId,
             registry.Nome,
             0,
             reisterValue,
@@ -39,7 +39,7 @@ public class KafkaService
     public Event1000_1 CreateBrokerPackage(Registry registry, bool reisterValue)
     {
         return new Event1000_1(
-            registry.Id,
+            registry.CodeId,
             registry.Nome,
             0,
             reisterValue,
@@ -50,7 +50,7 @@ public class KafkaService
     public Event1000_1 CreateBrokerPackage(Registry registry, float[] reisterValue)
     {
         return new Event1000_1(
-            registry.Id,
+            registry.CodeId,
             registry.Nome,
             0,
             reisterValue,
@@ -61,7 +61,7 @@ public class KafkaService
     public Event1000_1 CreateBrokerPackage(Registry registry, float reisterValue)
     {
         return new Event1000_1(
-            registry.Id,
+            registry.CodeId,
             registry.Nome,
             0,
             reisterValue,

@@ -33,7 +33,7 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
 
     public async Task<bool> DeleteById(int id)
     {
-        var filter = Builders<ForecastRegistry>.Filter.Eq(x => x.Id, id);
+        var filter = Builders<ForecastRegistry>.Filter.Eq(x => x.CodeId, id);
         var result = await forecastRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
@@ -57,7 +57,7 @@ public class ForecastRepository(IMongoCollection<ForecastRegistry> forecastRegis
     public async Task<ForecastRegistry> ReplaceOne(ForecastRegistry document)
     {
         var result = await forecastRegistryCollection.ReplaceOneAsync(
-            f => f.Id == document.Id, 
+            f => f.CodeId == document.CodeId, 
             document
         );
 
