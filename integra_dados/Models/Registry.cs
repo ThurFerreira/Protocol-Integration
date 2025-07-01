@@ -51,12 +51,12 @@ public class Registry
         return false;
     }
 
-    public void UpdateRegistry(int onOffSwitchValue)
+    public void UpdateRegistry(int? onOffSwitchValue)
     {
         const int VALUE_NOT_VALID = -1;
         UpdateDate();
 
-        if (onOffSwitchValue == VALUE_NOT_VALID)
+        if (onOffSwitchValue == VALUE_NOT_VALID && onOffSwitchValue != null)
         {
             UpgradeStatusToUnavailable();
         }
@@ -66,12 +66,12 @@ public class Registry
         }
     }
     
-    public void UpdateRegistry(double onOffSwitchValue)
+    public void UpdateRegistry(double? onOffSwitchValue)
     {
         double VALUE_NOT_VALID = -1.0;
         UpdateDate();
 
-        if (onOffSwitchValue == VALUE_NOT_VALID)
+        if (onOffSwitchValue != VALUE_NOT_VALID && onOffSwitchValue != null)
         {
             UpgradeStatusToUnavailable();
         }
@@ -81,9 +81,19 @@ public class Registry
         }
     }
     
-    public void UpdateRegistry(bool onOffSwitchValue)
+    public void UpdateRegistry(bool? onOffSwitchValue)
     {
+        double VALUE_NOT_VALID = -1.0;
         UpdateDate();
+
+        if (onOffSwitchValue != null)
+        {
+            UpgradeStatusToUnavailable();
+        }
+        else
+        {
+            UpgradeStatusToAvailable();
+        }
     }
 
     private void UpdateDate()

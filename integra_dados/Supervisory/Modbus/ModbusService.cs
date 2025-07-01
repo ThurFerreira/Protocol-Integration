@@ -48,7 +48,7 @@ public class ModbusService(
         return false;
     }
 
-    public bool ReadDiscreteInput(ModbusRegistry registry)
+    public bool? ReadDiscreteInput(ModbusRegistry registry)
     {
         if (!ModbusClient.Connected)
         {
@@ -59,16 +59,17 @@ public class ModbusService(
         {
             try
             {
-                var serverResponse = ModbusClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
+                bool[]? serverResponse = null;
+                serverResponse = ModbusClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
 
-                if (serverResponse == null ||
-                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                if (serverResponse != null )
                 {
-                    report.LightException(Status.EMPTY_READ);
-                    System.Console.WriteLine("No data returned from the Modbus server.");
+                    return serverResponse[0];
                 }
-
-                return serverResponse[0];
+                
+                report.LightException(Status.EMPTY_READ);
+                System.Console.WriteLine("No data returned from the Modbus server.");
+                return null;
             }
             catch (Exception ex)
             {
@@ -79,7 +80,7 @@ public class ModbusService(
         return false;
     }
 
-    public int ReadInputRegister(ModbusRegistry registry)
+    public int? ReadInputRegister(ModbusRegistry registry)
     {
         if (!ModbusClient.Connected)
         {
@@ -90,16 +91,17 @@ public class ModbusService(
         {
             try
             {
-                var serverResponse = ModbusClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                int[]? serverResponse = null;
+                serverResponse = ModbusClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
-                if (serverResponse == null ||
-                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
-                    report.LightException(Status.EMPTY_READ);
-                    System.Console.WriteLine("No data returned from the Modbus server.");
+                    return serverResponse[0];
                 }
 
-                return serverResponse[0];
+                report.LightException(Status.EMPTY_READ);
+                System.Console.WriteLine("No data returned from the Modbus server.");
+                return null;
             }
             catch (Exception ex)
             {
@@ -111,7 +113,7 @@ public class ModbusService(
         return -1;
     }
 
-    public bool ReadCoil(ModbusRegistry registry)
+    public bool? ReadCoil(ModbusRegistry registry)
     {
         if (!ModbusClient.Connected)
         {
@@ -122,16 +124,17 @@ public class ModbusService(
         {
             try
             {
-                var serverResponse = ModbusClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
+                bool[]? serverResponse = null;
+                serverResponse = ModbusClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
 
-                if (serverResponse == null ||
-                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
-                    report.LightException(Status.EMPTY_READ);
-                    System.Console.WriteLine("No data returned from the Modbus server.");
+                    return serverResponse[0];
                 }
 
-                return serverResponse[0];
+                report.LightException(Status.EMPTY_READ);
+                System.Console.WriteLine("No data returned from the Modbus server.");
+                return null;
             }
             catch (Exception ex)
             {
@@ -143,7 +146,7 @@ public class ModbusService(
         return false;
     }
 
-    public int ReadHoldingRegister(ModbusRegistry registry)
+    public int? ReadHoldingRegister(ModbusRegistry registry)
     {
         if (!ModbusClient.Connected)
         {
@@ -154,17 +157,18 @@ public class ModbusService(
         {
             try
             {
-                var serverResponse =
+                int[]? serverResponse = null;
+                serverResponse =
                     ModbusClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
-                if (serverResponse == null ||
-                    serverResponse.Length == 0) //se retornar 0 o sensor pode estar fora da agua
+                if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
-                    report.LightException(Status.EMPTY_READ);
-                    System.Console.WriteLine("No data returned from the Modbus server.");
+                    return serverResponse[0];
                 }
 
-                return serverResponse[0];
+                report.LightException(Status.EMPTY_READ);
+                System.Console.WriteLine("No data returned from the Modbus server.");
+                return null;
             }
             catch (Exception ex)
             {
@@ -319,7 +323,7 @@ public class ModbusService(
                     ReplaceRegistry(registry);
                     if (registry.ShouldSendToBroker(registerValueIntRegister))
                     {
-                        if (registerValueIntRegister != -1)
+                        if (registerValueIntRegister != null && registerValueIntRegister != -1)
                         {
                             Event1000_1 brokerPackage =
                                 kafkaService.CreateBrokerPackage(registry, registerValueIntRegister);
@@ -348,7 +352,7 @@ public class ModbusService(
                     ReplaceRegistry(registry);
                     if (registry.ShouldSendToBroker(registerValueHolding))
                     {
-                        if (registerValueHolding != -1)
+                        if (registerValueHolding != null && registerValueHolding != -1)
                         {
                             Event1000_1 brokerPackage =
                                 kafkaService.CreateBrokerPackage(registry, registerValueHolding);
