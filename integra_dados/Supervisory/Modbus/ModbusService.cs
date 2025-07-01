@@ -1,5 +1,6 @@
 using System.Net;
 using EasyModbus;
+using EasyModbus.Exceptions;
 using integra_dados.Models;
 using integra_dados.Models.Response;
 using integra_dados.Repository;
@@ -13,7 +14,8 @@ public class ModbusService(
     KafkaService kafkaService,
     Report report)
 {
-    public static ModbusClient? ModbusClient = new ModbusClient();
+    public static ModbusClient ModbusClient = new ModbusClient();
+    // public static Dictionary<string, ModbusClient>? ModbusClientList = new Dictionary<string, ModbusClient>();
     private static Dictionary<int, ModbusRegistry> registries = new Dictionary<int, ModbusRegistry>();
 
     public bool ConnectClientModbus(ModbusRegistry registry)
@@ -30,6 +32,7 @@ public class ModbusService(
                 ModbusClient.Connect();
                 if (ModbusClient.Connected)
                 {
+                    // ModbusClientList[registry.Ip] = modbusClient;
                     Console.WriteLine("Connected successfully.");
                     return true;
                 }
@@ -37,7 +40,8 @@ public class ModbusService(
             catch (System.Exception E)
             {
                 report.LightException(Status.NOT_CONNECTED);
-                Console.WriteLine("Failed to connect after multiple attempts. " + E.Message);
+                Console.WriteLine("Failed to connect after attempt. " + E.Message);
+                
                 return false;
             }
 
@@ -50,6 +54,7 @@ public class ModbusService(
 
     public bool? ReadDiscreteInput(ModbusRegistry registry)
     {
+        // ModbusClient modbusClient = ModbusClientList[registry.Ip];
         if (!ModbusClient.Connected)
         {
             ConnectClientModbus(registry);
@@ -71,9 +76,10 @@ public class ModbusService(
                 System.Console.WriteLine("No data returned from the Modbus server.");
                 return null;
             }
-            catch (Exception ex)
+            catch (ConnectionException ce)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ce.Message);
+                ModbusClient.Disconnect();
             }
         }
 
@@ -107,6 +113,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                ModbusClient.Disconnect();
             }
         }
 
@@ -140,6 +147,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                ConnectClientModbus(registry);
             }
         }
 
@@ -174,6 +182,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                ConnectClientModbus(registry);
             }
         }
 
@@ -365,7 +374,7 @@ public class ModbusService(
         }
         catch (Exception e)
         {
-            Console.WriteLine("Error on monitor supervisory modbus");
+            Console.WriteLine("Error on monitor supervisory modbus " + e.Message);
             report.ModerateException(Status.ERROR); 
         }
     }
