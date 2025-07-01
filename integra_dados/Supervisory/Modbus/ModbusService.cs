@@ -14,25 +14,20 @@ public class ModbusService(
     KafkaService kafkaService,
     Report report)
 {
-    public static ModbusClient ModbusClient = new ModbusClient();
-    // public static Dictionary<string, ModbusClient>? ModbusClientList = new Dictionary<string, ModbusClient>();
+    public static Dictionary<string, ModbusClient>? ModbusClientList = new Dictionary<string, ModbusClient>();
     private static Dictionary<int, ModbusRegistry> registries = new Dictionary<int, ModbusRegistry>();
 
-    public bool ConnectClientModbus(ModbusRegistry registry)
+    public bool ConnectClientModbus(ModbusClient modbusClient, ModbusRegistry registry)
     {
-        ModbusClient.IPAddress = registry.Ip;
-        ModbusClient.Port = registry.Porta;
-        ModbusClient.SerialPort = null;
-
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-        while (!ModbusClient.Connected && stopwatch.ElapsedMilliseconds < 30000)
+        while (!modbusClient.Connected && stopwatch.ElapsedMilliseconds < 30000)
         {
             try
             {
-                ModbusClient.Connect();
-                if (ModbusClient.Connected)
+                modbusClient.Connect();
+                if (modbusClient.Connected)
                 {
-                    // ModbusClientList[registry.Ip] = modbusClient;
+                    ModbusClientList[registry.Ip] = modbusClient;
                     Console.WriteLine("Connected successfully.");
                     return true;
                 }
@@ -54,18 +49,19 @@ public class ModbusService(
 
     public bool? ReadDiscreteInput(ModbusRegistry registry)
     {
-        // ModbusClient modbusClient = ModbusClientList[registry.Ip];
-        if (!ModbusClient.Connected)
+        ModbusClient modbusClient = ModbusClientList.ContainsKey(registry.Ip) && ModbusClientList[registry.Ip] != null ? ModbusClientList[registry.Ip] : new ModbusClient(registry.Ip, registry.Porta);
+
+        if (!modbusClient.Connected)
         {
-            ConnectClientModbus(registry);
+            ConnectClientModbus(modbusClient, registry);
         }
 
-        if (ModbusClient.Connected)
+        if (modbusClient.Connected)
         {
             try
             {
                 bool[]? serverResponse = null;
-                serverResponse = ModbusClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
+                serverResponse = modbusClient.ReadDiscreteInputs(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse != null )
                 {
@@ -79,7 +75,7 @@ public class ModbusService(
             catch (ConnectionException ce)
             {
                 Console.WriteLine(ce.Message);
-                ModbusClient.Disconnect();
+                modbusClient.Disconnect();
             }
         }
 
@@ -88,17 +84,19 @@ public class ModbusService(
 
     public int? ReadInputRegister(ModbusRegistry registry)
     {
-        if (!ModbusClient.Connected)
+        ModbusClient modbusClient = ModbusClientList.ContainsKey(registry.Ip) && ModbusClientList[registry.Ip] != null ? ModbusClientList[registry.Ip] : new ModbusClient(registry.Ip, registry.Porta);
+
+        if (!modbusClient.Connected)
         {
-            ConnectClientModbus(registry);
+            ConnectClientModbus(modbusClient, registry);
         }
 
-        if (ModbusClient.Connected)
+        if (modbusClient.Connected)
         {
             try
             {
                 int[]? serverResponse = null;
-                serverResponse = ModbusClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                serverResponse = modbusClient.ReadInputRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
@@ -113,7 +111,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
-                ModbusClient.Disconnect();
+                modbusClient.Disconnect();
             }
         }
 
@@ -122,17 +120,19 @@ public class ModbusService(
 
     public bool? ReadCoil(ModbusRegistry registry)
     {
-        if (!ModbusClient.Connected)
+        ModbusClient modbusClient = ModbusClientList.ContainsKey(registry.Ip) && ModbusClientList[registry.Ip] != null ? ModbusClientList[registry.Ip] : new ModbusClient(registry.Ip, registry.Porta);
+
+        if (!modbusClient.Connected)
         {
-            ConnectClientModbus(registry);
+            ConnectClientModbus(modbusClient, registry);
         }
 
-        if (ModbusClient.Connected)
+        if (modbusClient.Connected)
         {
             try
             {
                 bool[]? serverResponse = null;
-                serverResponse = ModbusClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
+                serverResponse = modbusClient.ReadCoils(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
@@ -147,7 +147,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
-                ConnectClientModbus(registry);
+                modbusClient.Disconnect();
             }
         }
 
@@ -156,18 +156,20 @@ public class ModbusService(
 
     public int? ReadHoldingRegister(ModbusRegistry registry)
     {
-        if (!ModbusClient.Connected)
+        ModbusClient modbusClient = ModbusClientList.ContainsKey(registry.Ip) && ModbusClientList[registry.Ip] != null ? ModbusClientList[registry.Ip] : new ModbusClient(registry.Ip, registry.Porta);
+
+        if (!modbusClient.Connected)
         {
-            ConnectClientModbus(registry);
+            ConnectClientModbus(modbusClient, registry);
         }
 
-        if (ModbusClient.Connected)
+        if (modbusClient.Connected)
         {
             try
             {
                 int[]? serverResponse = null;
                 serverResponse =
-                    ModbusClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
+                    modbusClient.ReadHoldingRegisters(registry.EnderecoInicio, registry.QuantidadeTags);
 
                 if (serverResponse != null) //se retornar 0 o sensor pode estar fora da agua
                 {
@@ -182,7 +184,7 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
-                ConnectClientModbus(registry);
+                modbusClient.Disconnect();
             }
         }
 
