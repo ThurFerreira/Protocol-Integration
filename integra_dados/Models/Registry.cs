@@ -56,7 +56,7 @@ public class Registry
         const int VALUE_NOT_VALID = -1;
         UpdateDate();
 
-        if (onOffSwitchValue == VALUE_NOT_VALID && onOffSwitchValue != null)
+        if (onOffSwitchValue == VALUE_NOT_VALID || onOffSwitchValue == null)
         {
             UpgradeStatusToUnavailable();
         }
@@ -68,10 +68,10 @@ public class Registry
     
     public void UpdateRegistry(double? onOffSwitchValue)
     {
-        double VALUE_NOT_VALID = -1.0;
+        const double VALUE_NOT_VALID = -1.0;
         UpdateDate();
 
-        if (onOffSwitchValue != VALUE_NOT_VALID && onOffSwitchValue != null)
+        if (onOffSwitchValue == VALUE_NOT_VALID || onOffSwitchValue == null)
         {
             UpgradeStatusToUnavailable();
         }
@@ -83,10 +83,9 @@ public class Registry
     
     public void UpdateRegistry(bool? onOffSwitchValue)
     {
-        double VALUE_NOT_VALID = -1.0;
         UpdateDate();
 
-        if (onOffSwitchValue != null)
+        if (onOffSwitchValue == null)
         {
             UpgradeStatusToUnavailable();
         }
