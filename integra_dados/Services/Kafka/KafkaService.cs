@@ -25,7 +25,7 @@ public class KafkaService
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
 
-    public Event1000_1 CreateBrokerPackage(Registry registry, int reisterValue)
+    public Event1000_1 CreateBrokerPackage(Registry registry, int? reisterValue)
     {
         return new Event1000_1(
             registry.CodeId,
@@ -36,7 +36,7 @@ public class KafkaService
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, bool reisterValue)
+    public Event1000_1 CreateBrokerPackage(Registry registry, bool? reisterValue)
     {
         return new Event1000_1(
             registry.CodeId,
@@ -47,7 +47,7 @@ public class KafkaService
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, float[] reisterValue)
+    public Event1000_1 CreateBrokerPackage(Registry registry, float[]? reisterValue)
     {
         return new Event1000_1(
             registry.CodeId,
@@ -58,7 +58,7 @@ public class KafkaService
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, float reisterValue)
+    public Event1000_1 CreateBrokerPackage(Registry registry, float? reisterValue)
     {
         return new Event1000_1(
             registry.CodeId,

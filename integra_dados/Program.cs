@@ -20,7 +20,9 @@ var serverSettings = builder.Configuration.GetSection("HttpServer").Get<ServerCo
 builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(serverSettings.Port); });
 
 // Kafka
-builder.Services.Configure<KafkaConfig>(builder.Configuration.GetSection("Kafka"));
+var kafkaSettigns = builder.Configuration.GetSection("Kafka");
+Console.WriteLine("KAKFA SETTINGS " + kafkaSettigns);
+builder.Services.Configure<KafkaConfig>(kafkaSettigns);
 builder.Services.AddSingleton<KafkaService>();
 
 // MongoDB Configuration
@@ -30,11 +32,12 @@ builder.Services.Configure<MongoDbConfig>(
 
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var settings = sp.GetRequiredService<IOptions<MongoDbConfig>>().Value;
-    if (string.IsNullOrEmpty(settings.ConnectionString))
+    var mongoConn = builder.Configuration["MongoDb:ConnectionString"];
+    Console.WriteLine("Mongo Connection String: " + mongoConn);
+    if (string.IsNullOrEmpty(mongoConn))
         throw new ArgumentException("MongoDB ConnectionString is null or empty.");
-
-    return new MongoClient(settings.ConnectionString);
+    
+    return new MongoClient(mongoConn);
 });
 
 // MongoDB Collections
@@ -82,11 +85,11 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 app.UseCors("AllowOtherApp");
 
