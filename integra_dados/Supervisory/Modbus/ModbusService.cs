@@ -78,6 +78,10 @@ public class ModbusService(
                 modbusClient.Disconnect();
             }
         }
+        else
+        {
+            registry.UpgradeStatusToUnavailable();
+        }
 
         return false;
     }
@@ -111,8 +115,13 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                registry.UpgradeStatusToUnavailable();
                 modbusClient.Disconnect();
             }
+        }
+        else
+        {
+            registry.UpgradeStatusToUnavailable();
         }
 
         return -1;
@@ -147,10 +156,15 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                registry.UpgradeStatusToUnavailable();
                 modbusClient.Disconnect();
             }
         }
-
+        else
+        {
+            registry.UpgradeStatusToUnavailable();
+        }
+        
         return false;
     }
 
@@ -184,10 +198,15 @@ public class ModbusService(
             {
                 report.LightException(Status.ERROR);
                 Console.WriteLine(ex.Message);
+                registry.UpgradeStatusToUnavailable();
                 modbusClient.Disconnect();
             }
         }
-
+        else
+        {
+            registry.UpgradeStatusToUnavailable();
+        }
+        
         return -1;
     }
 
