@@ -200,101 +200,114 @@ public class ForecastService(
     private async void MonitorForecast(ForecastRegistry registry)
     {
         WindyResponse response = await windyService.GetWindyForecast(registry.Location, registry.TipoDado);
-        
-        switch (registry.TipoDado)
-        {
-            case "temp":
-                registry.UpdateRegistry(response.TempSurface[0]);
-                float tempValue = (float) Math.Round(response.TempSurface[0] - 273.15F, 1);
-                
-                if (registry.ShouldSendToBroker(tempValue))
-                {
-                    if (tempValue != null)
-                    {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, tempValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
-                    }
-                }
 
-                break;
-            case "convPrecip":
-                registry.UpdateRegistry(response.PrecipSurface[0]);
-                float precipValue = response.PrecipSurface[0];
-                
-                if (registry.ShouldSendToBroker(precipValue))
-                {
-                    if (precipValue != null)
+        try
+        {
+            switch (registry.TipoDado)
+            {
+                case "temp":
+                    registry.UpdateRegistry(response.TempSurface[0]);
+                    float tempValue = (float)Math.Round(response.TempSurface[0] - 273.15F, 1);
+
+                    if (registry.ShouldSendToBroker(tempValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, precipValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (tempValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, tempValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
-            case "wind":
-                registry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
-                float[] windValue = new float[]{response.WindX[0], response.WindY[1]};
-                
-                if (registry.ShouldSendToBroker(windValue))
-                {
-                    if (windValue != null)
+
+                    break;
+                case "convPrecip":
+                    registry.UpdateRegistry(response.PrecipSurface[0]);
+                    float precipValue = response.PrecipSurface[0];
+
+                    if (registry.ShouldSendToBroker(precipValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, windValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (precipValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, precipValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
-            case "cape":
-                registry.UpdateRegistry(response.CapeSurface[0]);
-                float capeValue = response.CapeSurface[0];
-                
-                if (registry.ShouldSendToBroker(capeValue))
-                {
-                    if (capeValue != null)
+
+                    break;
+                case "wind":
+                    registry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
+                    float[] windValue = new float[] { response.WindX[0], response.WindY[1] };
+
+                    if (registry.ShouldSendToBroker(windValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, capeValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (windValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, windValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
-            case "rh":
-                registry.UpdateRegistry(response.Rh[0]);
-                float rhValue = response.Rh[0];
-                
-                if (registry.ShouldSendToBroker(rhValue))
-                {
-                    if (rhValue != null)
+
+                    break;
+                case "cape":
+                    registry.UpdateRegistry(response.CapeSurface[0]);
+                    float capeValue = response.CapeSurface[0];
+
+                    if (registry.ShouldSendToBroker(capeValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, rhValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (capeValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, capeValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
-            case "lclouds":
-                registry.UpdateRegistry(response.LowCloudsCoverage[0]);
-                float lcValue = response.LowCloudsCoverage[0];
-                
-                if (registry.ShouldSendToBroker(lcValue))
-                {
-                    if (lcValue != null)
+
+                    break;
+                case "rh":
+                    registry.UpdateRegistry(response.Rh[0]);
+                    float rhValue = response.Rh[0];
+
+                    if (registry.ShouldSendToBroker(rhValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, lcValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (rhValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, rhValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
-            case "hclouds":
-                registry.UpdateRegistry(response.HighCloudsCoverage[0]);
-                float hcValue = response.HighCloudsCoverage[0];
-                
-                if (registry.ShouldSendToBroker(hcValue))
-                {
-                    if (hcValue != null)
+
+                    break;
+                case "lclouds":
+                    registry.UpdateRegistry(response.LowCloudsCoverage[0]);
+                    float lcValue = response.LowCloudsCoverage[0];
+
+                    if (registry.ShouldSendToBroker(lcValue))
                     {
-                        Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, hcValue);
-                        kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        if (lcValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, lcValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
                     }
-                }
-                break;
+
+                    break;
+                case "hclouds":
+                    registry.UpdateRegistry(response.HighCloudsCoverage[0]);
+                    float hcValue = response.HighCloudsCoverage[0];
+
+                    if (registry.ShouldSendToBroker(hcValue))
+                    {
+                        if (hcValue != null)
+                        {
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, hcValue);
+                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                        }
+                    }
+
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            registry.UpgradeStatusToUnavailable();
         }
     }
 }
