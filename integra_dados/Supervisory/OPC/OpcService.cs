@@ -42,6 +42,7 @@ public class OpcService(
                 catch (Exception ex)
                 {
                     tentativas++;
+                    registry.UpgradeStatusToUnavailable();
                     Task.Delay(5000).Wait();
                     Console.WriteLine("Client opc failed to connect");
                 }
