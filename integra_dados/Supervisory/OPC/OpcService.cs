@@ -82,12 +82,14 @@ public class OpcService(
             }
             else
             {
+                opcRegistry.UpgradeStatusToUnavailable();
                 report.LightException(Status.NOT_CONNECTED);
                 return null;
             }
         }
         catch (Exception ex)
         {
+            opcRegistry.UpgradeStatusToUnavailable();
             Console.WriteLine(ex.Message);
         }
 
