@@ -78,12 +78,8 @@ public class ModbusService(
                 modbusClient.Disconnect();
             }
         }
-        else
-        {
-            registry.UpgradeStatusToUnavailable();
-        }
 
-        return false;
+        return null;
     }
 
     public int? ReadInputRegister(ModbusRegistry registry)
@@ -118,10 +114,6 @@ public class ModbusService(
                 registry.UpgradeStatusToUnavailable();
                 modbusClient.Disconnect();
             }
-        }
-        else
-        {
-            registry.UpgradeStatusToUnavailable();
         }
 
         return -1;
@@ -160,12 +152,8 @@ public class ModbusService(
                 modbusClient.Disconnect();
             }
         }
-        else
-        {
-            registry.UpgradeStatusToUnavailable();
-        }
         
-        return false;
+        return null;
     }
 
     public int? ReadHoldingRegister(ModbusRegistry registry)
@@ -201,10 +189,6 @@ public class ModbusService(
                 registry.UpgradeStatusToUnavailable();
                 modbusClient.Disconnect();
             }
-        }
-        else
-        {
-            registry.UpgradeStatusToUnavailable();
         }
         
         return -1;
