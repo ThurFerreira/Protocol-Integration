@@ -14,7 +14,6 @@ public class OpcController(OpcService opcService) : ControllerBase
     public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry opcRegistry)
     {
         opcRegistry.SetIdSistema();
-        opcRegistry.SetConnectionLink();
 
         var responseFromRegistry = await opcService.Create(opcRegistry);
 
@@ -33,7 +32,6 @@ public class OpcController(OpcService opcService) : ControllerBase
     [HttpPut("edit")]
     public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry opcRegistry)
     {
-        opcRegistry.SetConnectionLink();
         ResponseClient responseFromEdition = await opcService.Edit(opcRegistry);
         return Ok(responseFromEdition);
     }

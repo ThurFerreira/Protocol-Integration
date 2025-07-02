@@ -28,7 +28,7 @@ public class OpcService(
     {
         int tentativas = 0;
         // string link = "opc.tcp://10.3.195.224:4840";
-        string link = registry.LinkConexao;
+        string link = registry.GetConnectionLink();
         if (!clientesConectados.ContainsKey(link))
         {
             OpcClient = new OpcClient(link);
@@ -43,8 +43,8 @@ public class OpcService(
                 {
                     tentativas++;
                     registry.UpgradeStatusToUnavailable();
+                    Console.WriteLine("Client opc failed to connect " + ex.Message);
                     Task.Delay(5000).Wait();
-                    Console.WriteLine("Client opc failed to connect");
                 }
             }
         }

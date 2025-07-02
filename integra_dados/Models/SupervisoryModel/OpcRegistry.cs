@@ -2,12 +2,11 @@ namespace integra_dados.Models.SupervisoryModel;
 
 public class OpcRegistry : Registry
 {
-    public string? LinkConexao { get; set; }
     public List<string> NodeAddress { get; set; }
 
-    public void SetConnectionLink()
+    public string GetConnectionLink()
     {
-        LinkConexao = "opc.tpc://" + Ip + ":" + Porta;
+        return "opc.tcp://" + Ip + ":" + Porta;
     }
 
 }
