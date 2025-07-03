@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace integra_dados.Models;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Protocol
+public enum ReadProtocol
 {
     //annotation for enum can be written as string
     [EnumMember(Value = "modbus")] modbus,

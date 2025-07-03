@@ -31,7 +31,6 @@ public class KafkaService
         return new Event1000_1(
             registry.CodeId,
             registry.Nome,
-            0,
             reisterValue,
             registry.UltimaAtualizacao
         );
@@ -42,7 +41,6 @@ public class KafkaService
         return new Event1000_1(
             registry.CodeId,
             registry.Nome,
-            0,
             reisterValue,
             registry.UltimaAtualizacao
         );
@@ -53,7 +51,6 @@ public class KafkaService
         return new Event1000_1(
             registry.CodeId,
             registry.Nome,
-            0,
             reisterValue,
             registry.UltimaAtualizacao
         );
@@ -64,7 +61,6 @@ public class KafkaService
         return new Event1000_1(
             registry.CodeId,
             registry.Nome,
-            0,
             reisterValue,
             registry.UltimaAtualizacao
         );
