@@ -93,6 +93,7 @@ public class OpcService
             clientesConectados.TryGetValue(opcRegistry.GetConnectionLink(), out Session? opcClient);
             if (opcClient == null || !opcClient.Connected)
             {
+                opcRegistry.UpgradeStatusToUnavailable();
                 opcClient = ConnectClientOpc(opcRegistry).Result;
             }
 
