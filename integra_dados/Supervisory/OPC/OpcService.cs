@@ -8,35 +8,68 @@ using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
 using MongoDB.Bson;
-using Opc.UaFx;
-using Opc.UaFx.Client;
+using Opc.Ua;
+using Opc.Ua.Client;
+
 
 namespace integra_dados.Supervisory.OPC;
 
-public class OpcService(
-    IRepository<OpcRegistry> opcRepository,
-    KafkaService kafkaService,
-    Report report)
+public class OpcService
 {
     private static Dictionary<int, OpcRegistry> registries = new Dictionary<int, OpcRegistry>();
-    public static OpcClient? OpcClient = new OpcClient();
+    private ApplicationConfiguration config = new ApplicationConfiguration();
+    private IRepository<OpcRegistry> _opcRepository;
+    private KafkaService _kafkaService;
+    private Report _report;
 
-    public static ConcurrentDictionary<string, OpcClient> clientesConectados =
-        new ConcurrentDictionary<string, OpcClient>();
 
-    public void ConnectClientOpc(OpcRegistry registry)
+    public static ConcurrentDictionary<string, Session> clientesConectados = new ConcurrentDictionary<string, Session>();
+
+    public OpcService(IRepository<OpcRegistry> opcRepository, KafkaService kafkaService, Report report)
+    {
+        _opcRepository = opcRepository;
+        _kafkaService = kafkaService;
+        _report = report;
+        
+        config = new ApplicationConfiguration()
+        {
+            ApplicationName = "IEDMonitor_Gerenciador",
+            ApplicationType = ApplicationType.Client,
+            SecurityConfiguration = new SecurityConfiguration
+            {
+                ApplicationCertificate = new CertificateIdentifier(),
+                AutoAcceptUntrustedCertificates = true
+            },
+            TransportConfigurations = new TransportConfigurationCollection(),
+            TransportQuotas = new TransportQuotas { OperationTimeout = 15000 },
+            ClientConfiguration = new ClientConfiguration { DefaultSessionTimeout = 60000 },
+        };
+
+        config.Validate(ApplicationType.Client);
+    }
+
+    public async Task<Session> ConnectClientOpc(OpcRegistry registry)
     {
         int tentativas = 0;
         // string link = "opc.tcp://10.3.195.224:4840";
         string link = registry.GetConnectionLink();
+        Session primarySession = null;
+
         if (!clientesConectados.ContainsKey(link))
         {
-            OpcClient = new OpcClient(link);
             while (tentativas < 5)
             {
                 try
                 {
-                    OpcClient.Connect();
+                    var selectedEndpoint = CoreClientUtils.SelectEndpoint(link, false);
+                    var endpoint = new ConfiguredEndpoint(null, selectedEndpoint);
+                    primarySession = await Session.Create(config, endpoint, false, "IEDMonitor_Integra", 60000, null, null);
+                   
+                    if (primarySession.Connected)
+                    {
+                        clientesConectados[link] = primarySession;
+                    }
+                    
                     break;
                 }
                 catch (Exception ex)
@@ -48,43 +81,46 @@ public class OpcService(
                 }
             }
         }
-
-        if (OpcClient.State == OpcClientState.Connected)
-        {
-            clientesConectados[link] = OpcClient;
-        }
-
+        
+        return primarySession;
     }
 
 
-    public List<OpcValue> ReadNodes(OpcRegistry opcRegistry)
+    public DataValueCollection ReadNodes(OpcRegistry opcRegistry)
     {
         try
         {
-            if (OpcClient == null || OpcClient.State != OpcClientState.Connected)
+            clientesConectados.TryGetValue(opcRegistry.GetConnectionLink(), out Session? opcClient);
+            if (opcClient == null || !opcClient.Connected)
             {
-                ConnectClientOpc(opcRegistry);
+                opcClient = ConnectClientOpc(opcRegistry).Result;
             }
 
-            if (OpcClient.State == OpcClientState.Connected)
+            if (opcClient != null && opcClient.Connected)
             {
-                OpcReadNode[] readNode = new OpcReadNode[opcRegistry.NodeAddress.Count];
+                ReadValueIdCollection readCollection = new ReadValueIdCollection();
                 for (int i = 0; i < opcRegistry.NodeAddress.Count; i++)
                 {
-                    readNode[i] = new OpcReadNode(opcRegistry.NodeAddress[i]);
+                    readCollection.Add(
+                        new ReadValueId
+                        {
+                            NodeId = new NodeId(opcRegistry.NodeAddress[i]), //endereço do no para leitura
+                            AttributeId = Attributes.Value //escolhendo o que deseja retornar (nesse caso o valor atual do no)
+                        }
+                        );
                 }
 
-                List<OpcValue> resultadoBusca = OpcClient.ReadNodes(readNode).ToList();
+                opcClient.Read(null, 0, TimestampsToReturn.Neither, readCollection, out DataValueCollection results, out _);
 
-                if (resultadoBusca.Count > 0)
+                if (results != null && results.Count > 0)
                 {
-                    return resultadoBusca;
+                    return results;
                 }
             }
             else
             {
                 opcRegistry.UpgradeStatusToUnavailable();
-                report.LightException(Status.NOT_CONNECTED);
+                _report.LightException(Status.NOT_CONNECTED);
                 return null;
             }
         }
@@ -94,7 +130,7 @@ public class OpcService(
             Console.WriteLine(ex.Message);
         }
 
-        return new List<OpcValue>();
+        return new DataValueCollection();
     }
 
     public async Task<ResponseClient> Create(OpcRegistry registry)
@@ -104,9 +140,9 @@ public class OpcService(
             registry.TopicoBroker = registry.Nome;
         }
 
-        if (opcRepository.FindByName(registry.Nome) != null)
+        if (_opcRepository.FindByName(registry.Nome) != null)
         {
-            var savedRegistry = await opcRepository.Save(registry);
+            var savedRegistry = await _opcRepository.Save(registry);
             AddRegistry(savedRegistry);
             return new ResponseClient(
                 HttpStatusCode.OK,
@@ -125,7 +161,7 @@ public class OpcService(
     {
         try
         {
-            OpcRegistry opcFound = await opcRepository.ReplaceOne(opcRegistry);
+            OpcRegistry opcFound = await _opcRepository.ReplaceOne(opcRegistry);
             if (opcFound != null)
             {
                 ReplaceRegistry(opcFound);
@@ -161,7 +197,7 @@ public class OpcService(
 
     public async Task<ResponseClient> Delete(int id)
     {
-        bool deleted = await opcRepository.DeleteById(id);
+        bool deleted = await _opcRepository.DeleteById(id);
 
         if (deleted)
         {
@@ -202,13 +238,13 @@ public class OpcService(
     private void MonitorOpc(OpcRegistry registry)
     {
         Event1000_1 brokerPackage;
-        List<OpcValue> opcResponse = ReadNodes(registry);
+        DataValueCollection opcResponse = ReadNodes(registry);
         if (opcResponse != null)
         {
             foreach (var res in opcResponse)
             {
-                brokerPackage = kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
-                kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                brokerPackage = _kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
+                _kafkaService.Publish(registry.TopicoBroker, brokerPackage);
             }
         }
     }
