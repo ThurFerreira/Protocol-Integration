@@ -19,10 +19,10 @@ public class GenericDataController(
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<List<ReadRegistry>> registryList = new List<List<ReadRegistry>>();
-        registryList.Add(opcService.GetRegistries());
-        registryList.Add(modbusService.GetRegistries());
-        registryList.Add(forecastService.GetRegistries());
+        List<ReadRegistry> registryList = new List<ReadRegistry>();
+        registryList.AddRange(opcService.GetRegistries());
+        registryList.AddRange(modbusService.GetRegistries());
+        registryList.AddRange(forecastService.GetRegistries());
         return Ok(new ResponseClient(HttpStatusCode.OK, true, registryList, "Registros recuperados com sucesso!"));
     } 
 }
