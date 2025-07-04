@@ -8,31 +8,31 @@ using integra_dados.Services.Modbus;
 namespace integra_dados.Services;
 
 public class ForecastService(
-    IRepository<ForecastRegistry> forecastRepository,
+    IRepository<ForecastReadRegistry> forecastRepository,
     KafkaService kafkaService,
     ModbusService modbusService,
     WindyApiService windyService)
 {
-    private static Dictionary<int, ForecastRegistry> registries = new Dictionary<int, ForecastRegistry>();
+    private static Dictionary<int, ForecastReadRegistry> registries = new Dictionary<int, ForecastReadRegistry>();
 
-    public async Task<ResponseClient> Create(ForecastRegistry forecastRegistry)
+    public async Task<ResponseClient> Create(ForecastReadRegistry forecastReadRegistry)
     {
         try
         {
-            if (forecastRegistry.TopicoBroker == null || forecastRegistry.TopicoBroker.Equals(""))
+            if (forecastReadRegistry.TopicoBroker == null || forecastReadRegistry.TopicoBroker.Equals(""))
             {
-                forecastRegistry.TopicoBroker = forecastRegistry.Nome;
+                forecastReadRegistry.TopicoBroker = forecastReadRegistry.Nome;
             }
 
-            if (forecastRepository.FindByNameAndVarType(forecastRegistry.Nome, forecastRegistry.TipoDado) != null)
+            if (forecastRepository.FindByNameAndVarType(forecastReadRegistry.Nome, forecastReadRegistry.TipoDado) != null)
             {
-                ForecastRegistry forecastCreated = await forecastRepository.Save(forecastRegistry);
-                AddRegistry(forecastCreated);
+                ForecastReadRegistry forecastReadCreated = await forecastRepository.Save(forecastReadRegistry);
+                AddRegistry(forecastReadCreated);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    forecastCreated,
+                    forecastReadCreated,
                     "Registro de previsão adicionado com sucesso."
                 );
             }
@@ -41,7 +41,7 @@ public class ForecastService(
                 HttpStatusCode.Conflict,
                 false,
                 null,
-                $"Registro de previsão com nome {forecastRegistry.Nome} já foi criado."
+                $"Registro de previsão com nome {forecastReadRegistry.Nome} já foi criado."
             );
         }
         catch (Exception)
@@ -58,16 +58,16 @@ public class ForecastService(
         }
     }
 
-    public async Task<ResponseClient> Edit(ForecastRegistry forecastRegistry)
+    public async Task<ResponseClient> Edit(ForecastReadRegistry forecastReadRegistry)
     {
-        ForecastRegistry forecastFound = await forecastRepository.ReplaceOne(forecastRegistry);
-        if (forecastFound != null)
+        ForecastReadRegistry forecastReadFound = await forecastRepository.ReplaceOne(forecastReadRegistry);
+        if (forecastReadFound != null)
         {
-            ReplaceRegistry(forecastFound);
+            ReplaceRegistry(forecastReadFound);
 
             return new ResponseClient(
                 HttpStatusCode.OK,
-                true, forecastFound,
+                true, forecastReadFound,
                 "Registro de previsão atualizado com sucesso."
             );
         }
@@ -75,7 +75,7 @@ public class ForecastService(
         return new ResponseClient(
             HttpStatusCode.Conflict,
             false, null,
-            "Registro de previsão com nome '" + forecastRegistry.Nome + "' não foi encontrado."
+            "Registro de previsão com nome '" + forecastReadRegistry.Nome + "' não foi encontrado."
         );
     }
 
@@ -102,7 +102,7 @@ public class ForecastService(
 
     public async Task<ResponseClient> GetAllForecastForVariable(string name)
     {
-        List<ForecastRegistry> response = await forecastRepository.FindByName(name);
+        List<ForecastReadRegistry> response = await forecastRepository.FindByName(name);
         return new ResponseClient(HttpStatusCode.OK, true, response, "Busca realizada com sucesso");
     }
 
@@ -113,14 +113,14 @@ public class ForecastService(
     }
 
 
-    void AddRegistry(ForecastRegistry registry)
+    void AddRegistry(ForecastReadRegistry readRegistry)
     {
-        registries.Add(registry.CodeId, registry);
+        registries.Add(readRegistry.CodeId, readRegistry);
     }
 
-    public static List<ForecastRegistry> GetRegistries()
+    public List<ReadRegistry> GetRegistries()
     {
-        return registries.Values.ToList();
+        return registries.Values.Cast<ReadRegistry>().ToList();;
     }
 
     public static ResponseClient GetOne(int id)
@@ -131,7 +131,7 @@ public class ForecastService(
         return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
 
-    static ResponseClient CreateResponseToFoundRegistry(int idSistema, ForecastRegistry? foundRegistry)
+    static ResponseClient CreateResponseToFoundRegistry(int idSistema, ForecastReadRegistry? foundRegistry)
     {
         if (foundRegistry != null)
         {
@@ -153,7 +153,7 @@ public class ForecastService(
         }
     }
 
-    void ReplaceRegistry(ForecastRegistry supervisoryEdited)
+    void ReplaceRegistry(ForecastReadRegistry supervisoryEdited)
     {
         foreach (var registry in registries.Values.ToList())
         {
@@ -164,7 +164,7 @@ public class ForecastService(
         }
     }
 
-    public static void StartRegistries(List<ForecastRegistry> updateRegistries)
+    public static void StartRegistries(List<ForecastReadRegistry> updateRegistries)
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {
@@ -177,128 +177,128 @@ public class ForecastService(
         registries.Remove(id);
     }
 
-    public void TriggerBroker(List<ForecastRegistry> registries)
+    public void TriggerBroker(List<ReadRegistry> registries)
     {
-        foreach (ForecastRegistry forecastRegistry in registries.ToList())
+        foreach (ForecastReadRegistry forecastRegistry in registries.ToList())
         {
             CheckWhetherShouldTriggerBroker(forecastRegistry);
         }
     }
 
-    public void CheckWhetherShouldTriggerBroker(ForecastRegistry registry)
+    public void CheckWhetherShouldTriggerBroker(ForecastReadRegistry readRegistry)
     {
-        if (registry.FreqLeituraSeg > 0)
+        if (readRegistry.FreqLeituraSeg > 0)
         {
-            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
+            if (readRegistry.IsTimeToSendMessage(readRegistry.FreqLeituraSeg))
             {
                 //TODO ADICIONAR THREAD NO MONITOR SUPERVISORY
-                MonitorForecast(registry);
+                MonitorForecast(readRegistry);
             }
         }
     }
 
-    private async void MonitorForecast(ForecastRegistry registry)
+    private async void MonitorForecast(ForecastReadRegistry readRegistry)
     {
-        WindyResponse response = await windyService.GetWindyForecast(registry.Location, registry.TipoDado);
+        WindyResponse response = await windyService.GetWindyForecast(readRegistry.Location, readRegistry.TipoDado);
 
         try
         {
-            switch (registry.TipoDado)
+            switch (readRegistry.TipoDado)
             {
                 case "temp":
-                    registry.UpdateRegistry(response.TempSurface[0]);
+                    readRegistry.UpdateRegistry(response.TempSurface[0]);
                     float tempValue = (float)Math.Round(response.TempSurface[0] - 273.15F, 1);
 
-                    if (registry.ShouldSendToBroker(tempValue))
+                    if (readRegistry.ShouldSendToBroker(tempValue))
                     {
                         if (tempValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, tempValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, tempValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "convPrecip":
-                    registry.UpdateRegistry(response.PrecipSurface[0]);
+                    readRegistry.UpdateRegistry(response.PrecipSurface[0]);
                     float precipValue = response.PrecipSurface[0];
 
-                    if (registry.ShouldSendToBroker(precipValue))
+                    if (readRegistry.ShouldSendToBroker(precipValue))
                     {
                         if (precipValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, precipValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, precipValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "wind":
-                    registry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
+                    readRegistry.UpdateRegistry(response.WindX[0]); //TODO arrumar wind
                     float[] windValue = new float[] { response.WindX[0], response.WindY[1] };
 
-                    if (registry.ShouldSendToBroker(windValue))
+                    if (readRegistry.ShouldSendToBroker(windValue))
                     {
                         if (windValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, windValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, windValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "cape":
-                    registry.UpdateRegistry(response.CapeSurface[0]);
+                    readRegistry.UpdateRegistry(response.CapeSurface[0]);
                     float capeValue = response.CapeSurface[0];
 
-                    if (registry.ShouldSendToBroker(capeValue))
+                    if (readRegistry.ShouldSendToBroker(capeValue))
                     {
                         if (capeValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, capeValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, capeValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "rh":
-                    registry.UpdateRegistry(response.Rh[0]);
+                    readRegistry.UpdateRegistry(response.Rh[0]);
                     float rhValue = response.Rh[0];
 
-                    if (registry.ShouldSendToBroker(rhValue))
+                    if (readRegistry.ShouldSendToBroker(rhValue))
                     {
                         if (rhValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, rhValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, rhValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "lclouds":
-                    registry.UpdateRegistry(response.LowCloudsCoverage[0]);
+                    readRegistry.UpdateRegistry(response.LowCloudsCoverage[0]);
                     float lcValue = response.LowCloudsCoverage[0];
 
-                    if (registry.ShouldSendToBroker(lcValue))
+                    if (readRegistry.ShouldSendToBroker(lcValue))
                     {
                         if (lcValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, lcValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, lcValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
                     break;
                 case "hclouds":
-                    registry.UpdateRegistry(response.HighCloudsCoverage[0]);
+                    readRegistry.UpdateRegistry(response.HighCloudsCoverage[0]);
                     float hcValue = response.HighCloudsCoverage[0];
 
-                    if (registry.ShouldSendToBroker(hcValue))
+                    if (readRegistry.ShouldSendToBroker(hcValue))
                     {
                         if (hcValue != null)
                         {
-                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(registry, hcValue);
-                            kafkaService.Publish(registry.TopicoBroker, brokerPackage);
+                            Event1000_1 brokerPackage = kafkaService.CreateBrokerPackage(readRegistry, hcValue);
+                            kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
                         }
                     }
 
@@ -307,7 +307,7 @@ public class ForecastService(
         }
         catch (Exception e)
         {
-            registry.UpgradeStatusToUnavailable();
+            readRegistry.UpgradeStatusToUnavailable();
         }
     }
 }
