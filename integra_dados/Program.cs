@@ -1,6 +1,8 @@
 using integra_dados.Config;
 using integra_dados.Models;
 using integra_dados.Models.SupervisoryModel;
+using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
+using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
 using integra_dados.Repository;
 using integra_dados.Services;
 using integra_dados.Services.Kafka;
@@ -41,22 +43,22 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 // MongoDB Collections
-builder.Services.AddMongoCollection<ForecastRegistry>();
-builder.Services.AddMongoCollection<ModbusRegistry>();
-builder.Services.AddMongoCollection<OpcRegistry>();
+builder.Services.AddMongoCollection<ForecastReadRegistry>();
+builder.Services.AddMongoCollection<ModbusReadRegistry>();
+builder.Services.AddMongoCollection<OpcReadRegistry>();
 
 // Modbus
-builder.Services.AddScoped<IRepository<ModbusRegistry>, ModbusRepository>();
+builder.Services.AddScoped<IRepository<ModbusReadRegistry>, ModbusRepository>();
 builder.Services.AddScoped<ModbusService>();
 
 // Windy Forecast
 builder.Services.AddSingleton<WindyApiService>();
 builder.Services.AddScoped<ForecastService>();
-builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
+builder.Services.AddScoped<IRepository<ForecastReadRegistry>, ForecastRepository>();
 
 // OPC
 builder.Services.AddScoped<OpcService>();
-builder.Services.AddScoped<IRepository<OpcRegistry>, OpcRepository>();
+builder.Services.AddScoped<IRepository<OpcReadRegistry>, OpcRepository>();
 
 // Notifier Dependencies
 builder.Services.AddSingleton<Report>();

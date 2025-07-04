@@ -1,64 +1,44 @@
 namespace integra_dados.Models;
 
-public class Event1000_1
+public class Event1000_1 : Event
 {
-    public string Uri { get; set; } = "1000/1";
-    public int IdSistema { get; set; }
-    public string Nome { get; set; }
-    public int Token { get; set; } = 0;
+   
     public float? ValorFloat { get; set; }
     public int? ValorInt { get; set; }
     public bool? ValorBool { get; set; }
     public string ValorString { get; set; }
     public float[] ValorArray { get; set; }
-
-    public DateTime TimeStamping { get; set; }
-
+    
     public const int MaxTokenValue = 65535;
 
-    public Event1000_1(int idSistema, string nome, int token, int? valorInt, DateTime timeStamping)
+    public Event1000_1(int idSistema, string nome, int? valorInt, DateTime timeStamping) : base(idSistema, nome, timeStamping)
     {
-        IdSistema = idSistema;
-        Nome = nome;
-        Token = token;
+        Uri = "1000/1";
         ValorInt = valorInt;
-        TimeStamping = timeStamping;
     }
     
-    public Event1000_1(int idSistema, string nome, int token, float? valorFloat, DateTime timeStamping)
+    public Event1000_1(int idSistema, string nome, float? valorFloat, DateTime timeStamping) : base(idSistema, nome, timeStamping)
     {
-        IdSistema = idSistema;
-        Nome = nome;
-        Token = token;
+        Uri = "1000/1";
         ValorFloat = valorFloat;
-        TimeStamping = timeStamping;
     }
     
-    public Event1000_1(int idSistema, string nome, int token, float[]? valorFloat, DateTime timeStamping)
+    public Event1000_1(int idSistema, string nome, float[]? valorFloat, DateTime timeStamping) : base(idSistema, nome, timeStamping)
     {
-        IdSistema = idSistema;
-        Nome = nome;
-        Token = token;
+        Uri = "1000/1";
         ValorArray = valorFloat;
-        TimeStamping = timeStamping;
     }
     
-    public Event1000_1(int idSistema, string nome, int token, string? valorString, DateTime timeStamping)
+    public Event1000_1(int idSistema, string nome, string? valorString, DateTime timeStamping) : base(idSistema, nome, timeStamping)
     {
-        IdSistema = idSistema;
-        Nome = nome;
-        Token = token;
+        Uri = "1000/1";
         ValorString = valorString;
-        TimeStamping = timeStamping;
     }
     
-    public Event1000_1(int idSistema, string nome, int token, bool? valorBool, DateTime timeStamping)
+    public Event1000_1(int idSistema, string nome, bool? valorBool, DateTime timeStamping) : base(idSistema, nome, timeStamping)
     {
-        IdSistema = idSistema;
-        Nome = nome;
-        Token = token;
+        Uri = "1000/1";
         ValorBool = valorBool;
-        TimeStamping = timeStamping;
     }
     
 }

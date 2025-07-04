@@ -1,6 +1,7 @@
-namespace integra_dados.Models.SupervisoryModel;
+namespace integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
 
-public class OpcRegistry : Registry
+[BsonCollection("OpcRegistry")]
+public class OpcReadRegistry : ReadRegistry
 {
     public List<string> NodeAddress { get; set; }
 

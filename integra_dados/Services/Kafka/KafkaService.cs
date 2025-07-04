@@ -26,47 +26,43 @@ public class KafkaService
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
 
-    public Event1000_1 CreateBrokerPackage(Registry registry, int? reisterValue)
+    public Event1000_1 CreateBrokerPackage(ReadRegistry readRegistry, int? reisterValue)
     {
         return new Event1000_1(
-            registry.CodeId,
-            registry.Nome,
-            0,
+            readRegistry.CodeId,
+            readRegistry.Nome,
             reisterValue,
-            registry.UltimaAtualizacao
+            readRegistry.UltimaAtualizacao
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, bool? reisterValue)
+    public Event1000_1 CreateBrokerPackage(ReadRegistry readRegistry, bool? reisterValue)
     {
         return new Event1000_1(
-            registry.CodeId,
-            registry.Nome,
-            0,
+            readRegistry.CodeId,
+            readRegistry.Nome,
             reisterValue,
-            registry.UltimaAtualizacao
+            readRegistry.UltimaAtualizacao
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, float[]? reisterValue)
+    public Event1000_1 CreateBrokerPackage(ReadRegistry readRegistry, float[]? reisterValue)
     {
         return new Event1000_1(
-            registry.CodeId,
-            registry.Nome,
-            0,
+            readRegistry.CodeId,
+            readRegistry.Nome,
             reisterValue,
-            registry.UltimaAtualizacao
+            readRegistry.UltimaAtualizacao
         );
     }
     
-    public Event1000_1 CreateBrokerPackage(Registry registry, float? reisterValue)
+    public Event1000_1 CreateBrokerPackage(ReadRegistry readRegistry, float? reisterValue)
     {
         return new Event1000_1(
-            registry.CodeId,
-            registry.Nome,
-            0,
+            readRegistry.CodeId,
+            readRegistry.Nome,
             reisterValue,
-            registry.UltimaAtualizacao
+            readRegistry.UltimaAtualizacao
         );
     }
 

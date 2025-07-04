@@ -1,6 +1,7 @@
 using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
+using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Services;
 using integra_dados.Services.Modbus;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +13,11 @@ namespace integra_dados.Controllers;
 public class ModbusController(ModbusService modbusService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusRegistry modbus)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusReadRegistry modbusRead)
     {
-        modbus.SetIdSistema();
+        modbusRead.SetIdSistema();
 
-        var responseFromRegistry = await modbusService.Create(modbus);
+        var responseFromRegistry = await modbusService.Create(modbusRead);
 
         return Ok(responseFromRegistry);
     }
@@ -31,9 +32,9 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] ModbusRegistry modbus)
+    public async Task<ActionResult> EditSupervisory([FromBody] ModbusReadRegistry modbusRead)
     {
-        ResponseClient responseFromEdition = await modbusService.Edit(modbus);
+        ResponseClient responseFromEdition = await modbusService.Edit(modbusRead);
         return Ok(responseFromEdition);
     }
     
@@ -47,7 +48,7 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ModbusRegistry> registries = modbusService.GetRegistries();
+        List<ReadRegistry> registries = modbusService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
@@ -61,7 +62,7 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpGet("variable/{id}/all")]
     public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
     {
-        List<ModbusRegistry> registries = modbusService.GetRegistries();
+        List<ReadRegistry> registries = modbusService.GetRegistries();
 
         var responseClient = new ResponseClient(
             HttpStatusCode.OK,

@@ -4,15 +4,21 @@ using Newtonsoft.Json;
 
 namespace integra_dados.Models;
 
-public class Registry
+public class ReadRegistry
 {
     [BsonId]
     [BsonIgnoreIfDefault]
     public ObjectId _Id { get; set; } = ObjectId.GenerateNewId();
+    
     public int CodeId { get; set; }
+    
     [JsonIgnore]
     public string? Uri { get; set; }
+    
     public StatusVariable? Status { get; set; }
+    
+    public string Ip { get; set; }
+    public int Porta { get; set; }
     [JsonIgnore]
     public string? Nome { get; set; }
     public string? Fonte { get; set; }
@@ -23,9 +29,7 @@ public class Registry
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
     public int FreqLeituraSeg { get; set; }
-    public string? Ip { get; set; }
-    public int Porta { get; set; }
-    public Protocol Protocol { get; set; }
+    public ReadProtocol Protocol { get; set; }
     
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
