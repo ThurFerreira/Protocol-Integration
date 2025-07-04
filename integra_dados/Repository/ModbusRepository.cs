@@ -1,65 +1,66 @@
 using System.Reflection.Metadata;
 using integra_dados.Models;
+using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace integra_dados.Repository;
 
-public class ModbusRepository(IMongoCollection<ModbusRegistry> modbusRegistryCollection) : IRepository<ModbusRegistry>
+public class ModbusRepository(IMongoCollection<ModbusReadRegistry> modbusRegistryCollection) : IRepository<ModbusReadRegistry>
 {
 
-    public async Task<List<ModbusRegistry>> FindByName(string name)
+    public async Task<List<ModbusReadRegistry>> FindByName(string name)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(s => s.Nome, name);
+        var filter = Builders<ModbusReadRegistry>.Filter.Eq(s => s.Nome, name);
         using var cursor = await modbusRegistryCollection.FindAsync(filter);
         return cursor.ToList();
     }
 
-    public Task<ModbusRegistry> FindOneByName(string name)
+    public Task<ModbusReadRegistry> FindOneByName(string name)
     {
         throw new NotImplementedException();
     }
 
-    Task<ModbusRegistry> IRepository<ModbusRegistry>.Save(ModbusRegistry document)
+    Task<ModbusReadRegistry> IRepository<ModbusReadRegistry>.Save(ModbusReadRegistry document)
     {
         return Save(document);
     }
 
-    async Task<ModbusRegistry> Save(ModbusRegistry document)
+    async Task<ModbusReadRegistry> Save(ModbusReadRegistry document)
     {
         await modbusRegistryCollection.InsertOneAsync(document);
         return document;
     }
 
-    public async Task<ModbusRegistry> FindById(int id)
+    public async Task<ModbusReadRegistry> FindById(int id)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(s => s.CodeId, id);
+        var filter = Builders<ModbusReadRegistry>.Filter.Eq(s => s.CodeId, id);
         using var cursor = await modbusRegistryCollection.FindAsync(filter);
         return await cursor.FirstOrDefaultAsync();
     }
 
     public async Task<bool> DeleteById(int id)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(x => x.CodeId, id);
+        var filter = Builders<ModbusReadRegistry>.Filter.Eq(x => x.CodeId, id);
         var result = await modbusRegistryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
 
-    public async Task<List<ModbusRegistry>> FindAll()
+    public async Task<List<ModbusReadRegistry>> FindAll()
     {
-        var result = await modbusRegistryCollection.FindAsync(FilterDefinition<ModbusRegistry>.Empty);
+        var result = await modbusRegistryCollection.FindAsync(FilterDefinition<ModbusReadRegistry>.Empty);
         return await result.ToListAsync();
     }
 
-    public async Task<ModbusRegistry> FindByNameAndVarType(string name, string varType)
+    public async Task<ModbusReadRegistry> FindByNameAndVarType(string name, string varType)
     {
-        var filter = Builders<ModbusRegistry>.Filter.Eq(s => s.Nome, name) & 
-                     Builders<ModbusRegistry>.Filter.Eq(s => s.TipoDado, varType); //TODO passar o nomeVariavel para tipodado no front
+        var filter = Builders<ModbusReadRegistry>.Filter.Eq(s => s.Nome, name) & 
+                     Builders<ModbusReadRegistry>.Filter.Eq(s => s.TipoDado, varType); //TODO passar o nomeVariavel para tipodado no front
 
         using var result = await modbusRegistryCollection.FindAsync(filter);
         return result.FirstOrDefault();    }
 
-    public async Task<ModbusRegistry> ReplaceOne(ModbusRegistry document)
+    public async Task<ModbusReadRegistry> ReplaceOne(ModbusReadRegistry document)
     {
         var existing = await modbusRegistryCollection
             .Find(x => x.CodeId == document.CodeId)

@@ -11,18 +11,18 @@ namespace integra_dados.Controllers;
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastReadRegistry forecastRead)
     {
-        forecast.SetIdSistema();
-        ResponseClient response = await forecastService.Create(forecast);
+        forecastRead.SetIdSistema();
+        ResponseClient response = await forecastService.Create(forecastRead);
         
         return Ok(response);
     }
 
     [HttpPut("edit")]
-    public async Task<ActionResult> Update([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult> Update([FromBody] ForecastReadRegistry forecastRead)
     {
-        ResponseClient response = await forecastService.Edit(forecast);
+        ResponseClient response = await forecastService.Edit(forecastRead);
         return Ok(response);
     }
     
@@ -60,7 +60,7 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ForecastRegistry> registries = ForecastService.GetRegistries();
+        List<ReadRegistry> registries = forecastService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
