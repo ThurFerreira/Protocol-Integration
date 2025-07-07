@@ -69,6 +69,7 @@ public class OpcService
                     if (primarySession.Connected)
                     {
                         clientesConectados[link] = primarySession;
+                        Console.WriteLine("OpcUa connected successfully");
                     }
                     
                     break;

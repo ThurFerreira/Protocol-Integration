@@ -29,7 +29,7 @@ public class ModbusService(
                 if (modbusClient.Connected)
                 {
                     ModbusClientList[modbusClient.IPAddress] = modbusClient;
-                    Console.WriteLine("Connected successfully.");
+                    Console.WriteLine("Modbus connected successfully.");
                     return true;
                 }
             }
