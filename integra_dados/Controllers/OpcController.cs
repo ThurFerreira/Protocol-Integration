@@ -13,11 +13,11 @@ namespace integra_dados.Controllers;
 public class OpcController(OpcService opcService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcReadRegistry opcReadRegistry)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry opcRegistry)
     {
-        opcReadRegistry.SetIdSistema();
+        opcRegistry.SetIdSistema();
 
-        var responseFromRegistry = await opcService.Create(opcReadRegistry);
+        var responseFromRegistry = await opcService.Create(opcRegistry);
 
         return Ok(responseFromRegistry);
     }
@@ -32,9 +32,9 @@ public class OpcController(OpcService opcService) : ControllerBase
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] OpcReadRegistry opcReadRegistry)
+    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry opcRegistry)
     {
-        ResponseClient responseFromEdition = await opcService.Edit(opcReadRegistry);
+        ResponseClient responseFromEdition = await opcService.Edit(opcRegistry);
         return Ok(responseFromEdition);
     }
     
@@ -48,7 +48,7 @@ public class OpcController(OpcService opcService) : ControllerBase
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ReadRegistry> registries = opcService.GetRegistries();
+        List<Registry> registries = opcService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,

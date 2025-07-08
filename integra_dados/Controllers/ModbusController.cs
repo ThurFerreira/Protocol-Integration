@@ -13,11 +13,11 @@ namespace integra_dados.Controllers;
 public class ModbusController(ModbusService modbusService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusReadRegistry modbusRead)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusRegistry modbus)
     {
-        modbusRead.SetIdSistema();
+        modbus.SetIdSistema();
 
-        var responseFromRegistry = await modbusService.Create(modbusRead);
+        var responseFromRegistry = await modbusService.Create(modbus);
 
         return Ok(responseFromRegistry);
     }
@@ -32,9 +32,9 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] ModbusReadRegistry modbusRead)
+    public async Task<ActionResult> EditSupervisory([FromBody] ModbusRegistry modbus)
     {
-        ResponseClient responseFromEdition = await modbusService.Edit(modbusRead);
+        ResponseClient responseFromEdition = await modbusService.Edit(modbus);
         return Ok(responseFromEdition);
     }
     
@@ -48,7 +48,7 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ReadRegistry> registries = modbusService.GetRegistries();
+        List<Registry> registries = modbusService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
@@ -62,7 +62,7 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpGet("variable/{id}/all")]
     public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
     {
-        List<ReadRegistry> registries = modbusService.GetRegistries();
+        List<Registry> registries = modbusService.GetRegistries();
 
         var responseClient = new ResponseClient(
             HttpStatusCode.OK,
