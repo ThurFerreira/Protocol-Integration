@@ -9,28 +9,28 @@ namespace integra_dados.Controllers;
 
 [ApiController]
 [Route("/forecast/windy/")]
-public class ForecastController(ForecastService forecastService) : ControllerBase
+public class ForecastController(ForecastService service) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry registry)
     {
-        forecast.SetIdSistema();
-        ResponseClient response = await forecastService.Create(forecast);
+        registry.SetIdSistema();
+        ResponseClient response = await service.Create(registry);
         
         return Ok(response);
     }
 
     [HttpPut("edit")]
-    public async Task<ActionResult> Update([FromBody] ForecastRegistry forecast)
+    public async Task<ActionResult> Update([FromBody] ForecastRegistry registry)
     {
-        ResponseClient response = await forecastService.Edit(forecast);
+        ResponseClient response = await service.Edit(registry);
         return Ok(response);
     }
     
     [HttpDelete("delete/{id}")]
     public async Task<ActionResult<ResponseClient>> Delete([FromRoute] int id)
     {
-        ResponseClient response = await forecastService.Delete(id);
+        ResponseClient response = await service.Delete(id);
         return Ok(response);
     }
     
@@ -46,7 +46,7 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     [HttpGet("location")]
     public async Task<ActionResult> GetForecastOnLocation(Location location, string varType)
     {
-        ResponseClient response = await forecastService.GetLocationForecast(location, varType);
+        ResponseClient response = await service.GetLocationForecast(location, varType);
         return Ok(response);
     }
 
@@ -54,14 +54,14 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     [HttpGet("registries/{varType}")]
     public async Task<ActionResult> GetAllForecastsForVariable([FromRoute] string varType)
     {
-        ResponseClient response = await forecastService.GetAllForecastForVariable(varType);
+        ResponseClient response = await service.GetAllForecastForVariable(varType);
         return Ok(response);
     }
     
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<Registry> registries = forecastService.GetRegistries();
+        List<Registry> registries = service.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
