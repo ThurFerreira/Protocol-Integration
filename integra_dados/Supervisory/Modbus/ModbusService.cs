@@ -231,11 +231,11 @@ public class ModbusService(
         }
     }
 
-    public async Task<ResponseClient> Edit(ModbusRegistry modbusRegistry)
+    public async Task<ResponseClient> Edit(ModbusRegistry registry)
     {
         try
         {
-            ModbusRegistry modbusFound = await supervisoryRepository.ReplaceOne(modbusRegistry);
+            ModbusRegistry modbusFound = await supervisoryRepository.ReplaceOne(registry);
             if (modbusFound != null)
             {
                 ReplaceRegistry(modbusFound);
@@ -243,7 +243,7 @@ public class ModbusService(
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    modbusRegistry,
+                    registry,
                     "Registro atualizado com sucesso."
                 );
             }
@@ -252,7 +252,7 @@ public class ModbusService(
                 HttpStatusCode.Conflict,
                 false,
                 null,
-                $"Registro com nome '{modbusRegistry.Nome}' não foi encontrado."
+                $"Registro com nome '{registry.Nome}' não foi encontrado."
             );
         }
         catch (Exception e)

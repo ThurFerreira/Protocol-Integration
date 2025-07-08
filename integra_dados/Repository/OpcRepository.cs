@@ -5,12 +5,12 @@ using MongoDB.Driver;
 
 namespace integra_dados.Repository;
 
-public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) : IRepository<OpcRegistry>
+public class OpcRepository(IMongoCollection<OpcRegistry> registryCollection) : IRepository<OpcRegistry>
 {
     public async Task<List<OpcRegistry>> FindByName(string name)
     {
         var filter = Builders<OpcRegistry>.Filter.Eq(s => s.Nome, name);
-        using var cursor = await opcRegistryCollection.FindAsync(filter);
+        using var cursor = await registryCollection.FindAsync(filter);
         return cursor.ToList();
     }
 
@@ -21,7 +21,7 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
 
     public async Task<OpcRegistry> Save(OpcRegistry document)
     {
-        await opcRegistryCollection.InsertOneAsync(document);
+        await registryCollection.InsertOneAsync(document);
         return document;
     }
 
@@ -33,13 +33,13 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
     public async Task<bool> DeleteById(int id)
     {
         var filter = Builders<OpcRegistry>.Filter.Eq(x => x.CodeId, id);
-        var result = await opcRegistryCollection.DeleteOneAsync(filter);
+        var result = await registryCollection.DeleteOneAsync(filter);
         return result.DeletedCount > 0;
     }
 
     public async Task<List<OpcRegistry>> FindAll()
     {
-        var result = await opcRegistryCollection.FindAsync(FilterDefinition<OpcRegistry>.Empty);
+        var result = await registryCollection.FindAsync(FilterDefinition<OpcRegistry>.Empty);
         return await result.ToListAsync();
     }
 
@@ -50,7 +50,7 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
 
     public async Task<OpcRegistry> ReplaceOne(OpcRegistry document)
     {
-        var existing = await opcRegistryCollection
+        var existing = await registryCollection
             .Find(x => x.CodeId == document.CodeId)
             .FirstOrDefaultAsync();
 
@@ -61,7 +61,7 @@ public class OpcRepository(IMongoCollection<OpcRegistry> opcRegistryCollection) 
         document._Id = existing._Id;
 
         // Substitui o documento
-        var result = await opcRegistryCollection.ReplaceOneAsync(
+        var result = await registryCollection.ReplaceOneAsync(
             x => x.CodeId == document.CodeId,
             document
         );
