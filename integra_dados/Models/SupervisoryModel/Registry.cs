@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace integra_dados.Models;
 
-public class ReadRegistry
+public class Registry
 {
     [BsonId]
     [BsonIgnoreIfDefault]
@@ -29,8 +29,8 @@ public class ReadRegistry
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
     public int FreqLeituraSeg { get; set; }
-    public ReadProtocol Protocol { get; set; }
-    
+    public ReadProtocol? ReadProtocol { get; set; }
+    public WriteProtocol? WriteProtocol { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
     public long LastRead { get; set; } = 0;

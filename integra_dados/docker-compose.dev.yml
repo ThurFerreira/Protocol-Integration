@@ -11,9 +11,9 @@ services:
       - "7001:7001"
     environment:
       ASPNETCORE_ENVIRONMENT: ${PHYSIS_ENV}
-      #aspnet atribui o valor de MongoDb__ConnectionString definido no docker-compose a Section MongoDb__ConnectionString{MongoDb__ConnectionString:}
+      #aspnet atribui o valor de MongoDb__ConnectionString definido no docker-compose para Section MongoDb__ConnectionString{MongoDb__ConnectionString:}
       MongoDb__ConnectionString: ${PHYSIS_MONGO_DB}
-      #aspnet atribui o valor de Kakfa__BootstrapServers definido no docker-compose a Section Kafka{BootstrapServers:}
+      #aspnet atribui o valor de Kakfa__BootstrapServers definido no docker-compose para Section Kafka{BootstrapServers:}
       Kafka__BootstrapServers: ${KAFKA_BROKER_1}
     deploy:
       resources:

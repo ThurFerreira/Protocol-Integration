@@ -19,7 +19,7 @@ public class GenericDataController(
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ReadRegistry> registryList = new List<ReadRegistry>();
+        List<Registry> registryList = new List<Registry>();
         registryList.AddRange(opcService.GetRegistries());
         registryList.AddRange(modbusService.GetRegistries());
         registryList.AddRange(forecastService.GetRegistries());

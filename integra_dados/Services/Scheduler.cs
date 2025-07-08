@@ -2,35 +2,39 @@ using integra_dados.Models;
 using integra_dados.Models.SupervisoryModel;
 using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
+using integra_dados.Models.SupervisoryModel.RegistryModel.WindyForecast;
 using integra_dados.Repository;
+using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
 using integra_dados.Supervisory.OPC;
 
 namespace integra_dados.Services;
 
-public class Scheduler(IServiceProvider serviceProvider, Report report) : BackgroundService
+public class Scheduler(IServiceProvider serviceProvider, Report report, KafkaService kafkaService) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Task.Run(() => kafkaService.ConsumeAndWriteDispositive("SUPERVISORY_WRITE_TOPIC", event10002 => ModbusService.WriteDiscreteInput(event10002)));
+        
         // Inicializa o RegistryManager uma vez no início
         using (var supervisoryScope = serviceProvider.CreateScope())
         {
-            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<ModbusReadRegistry>>();
+            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<ModbusRegistry>>();
             var allRegistries = await repository.FindAll();
             ModbusService.StartRegistries(allRegistries);
         }
         
         using (var forecastScope = serviceProvider.CreateScope())
         {
-            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastReadRegistry>>();
+            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<ForecastRegistry>>();
             var allRegistries = await repository.FindAll();
             ForecastService.StartRegistries(allRegistries);
         }
         
         using (var forecastScope = serviceProvider.CreateScope())
         {
-            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<OpcReadRegistry>>();
+            var repository = forecastScope.ServiceProvider.GetRequiredService<IRepository<OpcRegistry>>();
             var allRegistries = await repository.FindAll();
             OpcService.StartRegistries(allRegistries);
         }

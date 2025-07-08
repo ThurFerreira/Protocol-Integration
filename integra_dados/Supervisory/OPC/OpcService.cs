@@ -17,16 +17,16 @@ namespace integra_dados.Supervisory.OPC;
 
 public class OpcService
 {
-    private static Dictionary<int, OpcReadRegistry> registries = new Dictionary<int, OpcReadRegistry>();
+    private static Dictionary<int, OpcRegistry> registries = new Dictionary<int, OpcRegistry>();
     private ApplicationConfiguration config = new ApplicationConfiguration();
-    private IRepository<OpcReadRegistry> _opcRepository;
+    private IRepository<OpcRegistry> _opcRepository;
     private KafkaService _kafkaService;
     private Report _report;
 
 
     public static ConcurrentDictionary<string, Session> clientesConectados = new ConcurrentDictionary<string, Session>();
 
-    public OpcService(IRepository<OpcReadRegistry> opcRepository, KafkaService kafkaService, Report report)
+    public OpcService(IRepository<OpcRegistry> opcRepository, KafkaService kafkaService, Report report)
     {
         _opcRepository = opcRepository;
         _kafkaService = kafkaService;
@@ -49,11 +49,11 @@ public class OpcService
         config.Validate(ApplicationType.Client);
     }
 
-    public async Task<Session> ConnectClientOpc(OpcReadRegistry readRegistry)
+    public async Task<Session> ConnectClientOpc(OpcRegistry registry)
     {
         int tentativas = 0;
         // string link = "opc.tcp://10.3.195.224:4840";
-        string link = readRegistry.GetConnectionLink();
+        string link = registry.GetConnectionLink();
         Session primarySession = null;
 
         if (!clientesConectados.ContainsKey(link))
@@ -69,6 +69,7 @@ public class OpcService
                     if (primarySession.Connected)
                     {
                         clientesConectados[link] = primarySession;
+                        Console.WriteLine("OpcUa connected successfully");
                     }
                     
                     break;
@@ -76,7 +77,7 @@ public class OpcService
                 catch (Exception ex)
                 {
                     tentativas++;
-                    readRegistry.UpgradeStatusToUnavailable();
+                    registry.UpgradeStatusToUnavailable();
                     Console.WriteLine("Client opc failed to connect " + ex.Message);
                     Task.Delay(5000).Wait();
                 }
@@ -87,26 +88,26 @@ public class OpcService
     }
 
 
-    public DataValueCollection ReadNodes(OpcReadRegistry opcReadRegistry)
+    public DataValueCollection ReadNodes(OpcRegistry opcRegistry)
     {
         try
         {
-            clientesConectados.TryGetValue(opcReadRegistry.GetConnectionLink(), out Session? opcClient);
+            clientesConectados.TryGetValue(opcRegistry.GetConnectionLink(), out Session? opcClient);
             if (opcClient == null || !opcClient.Connected)
             {
-                opcReadRegistry.UpgradeStatusToUnavailable();
-                opcClient = ConnectClientOpc(opcReadRegistry).Result;
+                opcRegistry.UpgradeStatusToUnavailable();
+                opcClient = ConnectClientOpc(opcRegistry).Result;
             }
 
             if (opcClient != null && opcClient.Connected)
             {
                 ReadValueIdCollection readCollection = new ReadValueIdCollection();
-                for (int i = 0; i < opcReadRegistry.NodeAddress.Count; i++)
+                for (int i = 0; i < opcRegistry.NodeAddress.Count; i++)
                 {
                     readCollection.Add(
                         new ReadValueId
                         {
-                            NodeId = new NodeId(opcReadRegistry.NodeAddress[i]), //endereço do no para leitura
+                            NodeId = new NodeId(opcRegistry.NodeAddress[i]), //endereço do no para leitura
                             AttributeId = Attributes.Value //escolhendo o que deseja retornar (nesse caso o valor atual do no)
                         }
                         );
@@ -121,30 +122,30 @@ public class OpcService
             }
             else
             {
-                opcReadRegistry.UpgradeStatusToUnavailable();
+                opcRegistry.UpgradeStatusToUnavailable();
                 _report.LightException(Status.NOT_CONNECTED);
                 return null;
             }
         }
         catch (Exception ex)
         {
-            opcReadRegistry.UpgradeStatusToUnavailable();
+            opcRegistry.UpgradeStatusToUnavailable();
             Console.WriteLine(ex.Message);
         }
 
         return new DataValueCollection();
     }
 
-    public async Task<ResponseClient> Create(OpcReadRegistry readRegistry)
+    public async Task<ResponseClient> Create(OpcRegistry registry)
     {
-        if (readRegistry.TopicoBroker == null || readRegistry.TopicoBroker.Equals(""))
+        if (registry.TopicoBroker == null || registry.TopicoBroker.Equals(""))
         {
-            readRegistry.TopicoBroker = readRegistry.Nome;
+            registry.TopicoBroker = registry.Nome;
         }
 
-        if (_opcRepository.FindByName(readRegistry.Nome) != null)
+        if (_opcRepository.FindByName(registry.Nome) != null)
         {
-            var savedRegistry = await _opcRepository.Save(readRegistry);
+            var savedRegistry = await _opcRepository.Save(registry);
             AddRegistry(savedRegistry);
             return new ResponseClient(
                 HttpStatusCode.OK,
@@ -156,22 +157,22 @@ public class OpcService
         return new ResponseClient(
             HttpStatusCode.Conflict,
             false, null,
-            "Registro de previsão com nome '" + readRegistry.Nome + "' já foi criado.");
+            "Registro de previsão com nome '" + registry.Nome + "' já foi criado.");
     }
 
-    public async Task<ResponseClient> Edit(OpcReadRegistry opcReadRegistry)
+    public async Task<ResponseClient> Edit(OpcRegistry opcRegistry)
     {
         try
         {
-            OpcReadRegistry opcReadFound = await _opcRepository.ReplaceOne(opcReadRegistry);
-            if (opcReadFound != null)
+            OpcRegistry opcFound = await _opcRepository.ReplaceOne(opcRegistry);
+            if (opcFound != null)
             {
-                ReplaceRegistry(opcReadFound);
+                ReplaceRegistry(opcFound);
 
                 return new ResponseClient(
                     HttpStatusCode.OK,
                     true,
-                    opcReadRegistry,
+                    opcRegistry,
                     "Registro atualizado com sucesso."
                 );
             }
@@ -180,7 +181,7 @@ public class OpcService
                 HttpStatusCode.Conflict,
                 false,
                 null,
-                $"Registro com nome '{opcReadRegistry.Nome}' não foi encontrado."
+                $"Registro com nome '{opcRegistry.Nome}' não foi encontrado."
             );
         }
         catch (Exception e)
@@ -218,48 +219,48 @@ public class OpcService
         );
     }
 
-    public void TriggerBroker(List<ReadRegistry> registries)
+    public void TriggerBroker(List<Registry> registries)
     {
         
-        foreach (OpcReadRegistry supervisoryRegistry in registries.ToList())
+        foreach (OpcRegistry supervisoryRegistry in registries.ToList())
         {
             CheckWhetherShouldTriggerBroker(supervisoryRegistry);
         }
     }
 
-    public void CheckWhetherShouldTriggerBroker(OpcReadRegistry readRegistry)
+    public void CheckWhetherShouldTriggerBroker(OpcRegistry registry)
     {
-        if (readRegistry.FreqLeituraSeg > 0)
+        if (registry.FreqLeituraSeg > 0)
         {
-            if (readRegistry.IsTimeToSendMessage(readRegistry.FreqLeituraSeg))
+            if (registry.IsTimeToSendMessage(registry.FreqLeituraSeg))
             {
-                MonitorOpc(readRegistry);
+                MonitorOpc(registry);
             }
         }
     }
 
-    private void MonitorOpc(OpcReadRegistry readRegistry)
+    private void MonitorOpc(OpcRegistry registry)
     {
         Event1000_1 brokerPackage;
-        DataValueCollection opcResponse = ReadNodes(readRegistry);
+        DataValueCollection opcResponse = ReadNodes(registry);
         if (opcResponse != null)
         {
             foreach (var res in opcResponse)
             {
-                brokerPackage = _kafkaService.CreateBrokerPackage(readRegistry, Convert.ToInt64(res.Value));
-                _kafkaService.Publish(readRegistry.TopicoBroker, brokerPackage);
+                brokerPackage = _kafkaService.CreateBrokerPackage(registry, Convert.ToInt64(res.Value));
+                _kafkaService.Publish(registry.TopicoBroker, brokerPackage);
             }
         }
     }
 
-    public static void AddRegistry(OpcReadRegistry readRegistry)
+    public static void AddRegistry(OpcRegistry registry)
     {
-        registries.Add(readRegistry.CodeId, readRegistry);
+        registries.Add(registry.CodeId, registry);
     }
 
-    public List<ReadRegistry> GetRegistries()
+    public List<Registry> GetRegistries()
     {
-        return  registries.Values.Cast<ReadRegistry>().ToList();; 
+        return  registries.Values.Cast<Registry>().ToList();; 
     }
 
     public static ResponseClient GetOne(int id)
@@ -270,7 +271,7 @@ public class OpcService
         return CreateResponseToFoundRegistry(id, foundRegistry.Value);
     }
 
-    private static ResponseClient CreateResponseToFoundRegistry(int idSistema, ReadRegistry? foundRegistry)
+    private static ResponseClient CreateResponseToFoundRegistry(int idSistema, Registry? foundRegistry)
     {
         if (foundRegistry != null)
         {
@@ -292,7 +293,7 @@ public class OpcService
         }
     }
 
-    public static void ReplaceRegistry(OpcReadRegistry modbusEdited)
+    public static void ReplaceRegistry(OpcRegistry modbusEdited)
     {
         foreach (var registry in registries.Values.ToList())
         {
@@ -303,7 +304,7 @@ public class OpcService
         }
     }
 
-    public static void StartRegistries(List<OpcReadRegistry> updateRegistries)
+    public static void StartRegistries(List<OpcRegistry> updateRegistries)
     {
         foreach (var supervisoryRegistry in updateRegistries)
         {

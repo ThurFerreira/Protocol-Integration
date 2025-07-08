@@ -1,6 +1,7 @@
 using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
+using integra_dados.Models.SupervisoryModel.RegistryModel.WindyForecast;
 using integra_dados.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,18 +12,18 @@ namespace integra_dados.Controllers;
 public class ForecastController(ForecastService forecastService) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastReadRegistry forecastRead)
+    public async Task<ActionResult<ResponseClient>>? Create([FromBody] ForecastRegistry forecast)
     {
-        forecastRead.SetIdSistema();
-        ResponseClient response = await forecastService.Create(forecastRead);
+        forecast.SetIdSistema();
+        ResponseClient response = await forecastService.Create(forecast);
         
         return Ok(response);
     }
 
     [HttpPut("edit")]
-    public async Task<ActionResult> Update([FromBody] ForecastReadRegistry forecastRead)
+    public async Task<ActionResult> Update([FromBody] ForecastRegistry forecast)
     {
-        ResponseClient response = await forecastService.Edit(forecastRead);
+        ResponseClient response = await forecastService.Edit(forecast);
         return Ok(response);
     }
     
@@ -60,7 +61,7 @@ public class ForecastController(ForecastService forecastService) : ControllerBas
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<ReadRegistry> registries = forecastService.GetRegistries();
+        List<Registry> registries = forecastService.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
