@@ -34,7 +34,6 @@ public class KafkaService
             BootstrapServers = kafkaConfig.Value.BootstrapServers,
         };
 
-        Console.WriteLine("KAFKA BOOTSTRAP SERVERS "+ kafkaConfig.Value.BootstrapServers);
         //criando de fato o produtor kafka
         _producer = new ProducerBuilder<string, string>(ProducerConfig).Build();
     }
