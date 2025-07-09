@@ -29,7 +29,7 @@ public class Registry
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
     public int FreqLeituraSeg { get; set; }
-    public ReadProtocol? ReadProtocol { get; set; }
+    public Protocol? ReadProtocol { get; set; }
     public WriteProtocol? WriteProtocol { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient
