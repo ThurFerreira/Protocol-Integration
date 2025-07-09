@@ -10,14 +10,14 @@ namespace integra_dados.Controllers;
 
 [ApiController]
 [Route("/supervisory/modbus")]
-public class ModbusController(ModbusService modbusService) : ControllerBase
+public class ModbusController(ModbusService service) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusRegistry modbus)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] ModbusRegistry registry)
     {
-        modbus.SetIdSistema();
+        registry.SetIdSistema();
 
-        var responseFromRegistry = await modbusService.Create(modbus);
+        var responseFromRegistry = await service.Create(registry);
 
         return Ok(responseFromRegistry);
     }
@@ -34,21 +34,21 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpPut("edit")]
     public async Task<ActionResult> EditSupervisory([FromBody] ModbusRegistry modbus)
     {
-        ResponseClient responseFromEdition = await modbusService.Edit(modbus);
+        ResponseClient responseFromEdition = await service.Edit(modbus);
         return Ok(responseFromEdition);
     }
     
     [HttpDelete("delete/{id}")]
     public IActionResult DeleteSupervisoryRegistry([FromRoute] int id)
     {
-        modbusService.Delete(id);
+        service.Delete(id);
         return Ok(new ResponseClient("Registro deletado com sucesso"));
     }
 
     [HttpGet("all")]
     public ActionResult<ResponseClient> GetAll()
     {
-        List<Registry> registries = modbusService.GetRegistries();
+        List<Registry> registries = service.GetRegistries();
         ResponseClient response = new ResponseClient(
             HttpStatusCode.OK,
             true,
@@ -62,7 +62,7 @@ public class ModbusController(ModbusService modbusService) : ControllerBase
     [HttpGet("variable/{id}/all")]
     public ActionResult<ResponseClient> GetAllSupervisoryForVariable()
     {
-        List<Registry> registries = modbusService.GetRegistries();
+        List<Registry> registries = service.GetRegistries();
 
         var responseClient = new ResponseClient(
             HttpStatusCode.OK,

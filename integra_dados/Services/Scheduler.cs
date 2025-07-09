@@ -1,9 +1,11 @@
 using integra_dados.Models;
 using integra_dados.Models.SupervisoryModel;
+using integra_dados.Models.SupervisoryModel.RegistryModel.BACnet;
 using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
 using integra_dados.Models.SupervisoryModel.RegistryModel.WindyForecast;
 using integra_dados.Repository;
+using integra_dados.Services.BACnet;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
@@ -23,6 +25,13 @@ public class Scheduler(IServiceProvider serviceProvider, Report report, KafkaSer
             var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<ModbusRegistry>>();
             var allRegistries = await repository.FindAll();
             ModbusService.StartRegistries(allRegistries);
+        }
+        
+        using (var supervisoryScope = serviceProvider.CreateScope())
+        {
+            var repository = supervisoryScope.ServiceProvider.GetRequiredService<IRepository<BACnetRegistry>>();
+            var allRegistries = await repository.FindAll();
+            BACnetService.StartRegistries(allRegistries);
         }
         
         using (var forecastScope = serviceProvider.CreateScope())
@@ -59,6 +68,12 @@ public class Scheduler(IServiceProvider serviceProvider, Report report, KafkaSer
                 using (var scope = serviceProvider.CreateScope())
                 {
                     var opcService = scope.ServiceProvider.GetRequiredService<OpcService>();
+                    opcService.TriggerBroker(opcService.GetRegistries());
+                }
+                
+                using (var scope = serviceProvider.CreateScope())
+                {
+                    var opcService = scope.ServiceProvider.GetRequiredService<BACnetService>();
                     opcService.TriggerBroker(opcService.GetRegistries());
                 }
             }

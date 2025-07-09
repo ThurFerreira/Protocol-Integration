@@ -71,6 +71,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="BACnet" Version="3.0.1" />
       <PackageReference Include="Confluent.Kafka" Version="2.10.1" />
       <PackageReference Include="EasyModbusTCP" Version="5.6.0" />
       <PackageReference Include="MongoDB.Driver" Version="3.4.0" />

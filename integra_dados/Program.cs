@@ -1,11 +1,13 @@
 using integra_dados.Config;
 using integra_dados.Models;
 using integra_dados.Models.SupervisoryModel;
+using integra_dados.Models.SupervisoryModel.RegistryModel.BACnet;
 using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
 using integra_dados.Models.SupervisoryModel.RegistryModel.WindyForecast;
 using integra_dados.Repository;
 using integra_dados.Services;
+using integra_dados.Services.BACnet;
 using integra_dados.Services.Kafka;
 using integra_dados.Services.Modbus;
 using integra_dados.Services.Notifier;
@@ -47,6 +49,8 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddMongoCollection<ForecastRegistry>();
 builder.Services.AddMongoCollection<ModbusRegistry>();
 builder.Services.AddMongoCollection<OpcRegistry>();
+builder.Services.AddMongoCollection<BACnetRegistry>();
+
 
 // Modbus
 builder.Services.AddScoped<IRepository<ModbusRegistry>, ModbusRepository>();
@@ -60,6 +64,10 @@ builder.Services.AddScoped<IRepository<ForecastRegistry>, ForecastRepository>();
 // OPC
 builder.Services.AddScoped<OpcService>();
 builder.Services.AddScoped<IRepository<OpcRegistry>, OpcRepository>();
+
+// BACnet
+builder.Services.AddScoped<BACnetService>();
+builder.Services.AddScoped<IRepository<BACnetRegistry>, BACnetRepository>();
 
 // Notifier Dependencies
 builder.Services.AddSingleton<Report>();

@@ -1,19 +1,18 @@
 using System.Net;
 using integra_dados.Models;
 using integra_dados.Models.Response;
-using integra_dados.Models.SupervisoryModel;
-using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;
-using integra_dados.Supervisory.OPC;
+using integra_dados.Models.SupervisoryModel.RegistryModel.BACnet;
+using integra_dados.Services.BACnet;
 using Microsoft.AspNetCore.Mvc;
 
 namespace integra_dados.Controllers;
 
 [ApiController]
-[Route("/supervisory/opcua/")]
-public class OpcController(OpcService service) : ControllerBase
+[Route("/supervisory/bacnet/")]
+public class BACnetController(BACnetService service) : ControllerBase
 {
     [HttpPost("create")]
-    public async Task<ActionResult<ResponseClient>> Create([FromBody] OpcRegistry registry)
+    public async Task<ActionResult<ResponseClient>> Create([FromBody] BACnetRegistry registry)
     {
         registry.SetIdSistema();
 
@@ -27,12 +26,12 @@ public class OpcController(OpcService service) : ControllerBase
     [Produces("application/json")]
     public ActionResult<ResponseClient> GetOneSupervisoryRegister([FromRoute] int id)
     {
-        var responseClient = OpcService.GetOne(id);
+        var responseClient = BACnetService.GetOne(id);
         return Ok(responseClient);
     }
     
     [HttpPut("edit")]
-    public async Task<ActionResult> EditSupervisory([FromBody] OpcRegistry registry)
+    public async Task<ActionResult> EditSupervisory([FromBody] BACnetRegistry registry)
     {
         ResponseClient responseFromEdition = await service.Edit(registry);
         return Ok(responseFromEdition);

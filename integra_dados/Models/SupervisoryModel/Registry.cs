@@ -114,9 +114,9 @@ public class Registry
         Status = StatusVariable.UNAVAILABLE;
     }
 
-    public bool ShouldSendToBroker(Object actualRegisteredValue)
+    public bool ShouldSendToBroker(Object? actualRegisteredValue)
     {
-        if (OtimizarPublicacaoBroker)
+        if (OtimizarPublicacaoBroker && actualRegisteredValue != null)
         {
             if (actualRegisteredValue.Equals(LastRegisteredValue))
             {
@@ -124,6 +124,10 @@ public class Registry
             }
 
             LastRegisteredValue = actualRegisteredValue;
+        }
+        else
+        {
+            return false;
         }
 
         return true;
