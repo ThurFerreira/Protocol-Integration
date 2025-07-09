@@ -146,11 +146,27 @@ public class BACnetService(
             {
                 case BacnetObjectTypes.OBJECT_ANALOG_INPUT:
                     float? analogValue = ReadAnalog(registry);
-                    event1000 = kafkaService.CreateBrokerPackage(registry, analogValue);
+                    registry.UpdateRegistry(analogValue);
+                    ReplaceRegistry(registry);
+                    if (registry.ShouldSendToBroker(analogValue))
+                    {
+                        if (analogValue != null)
+                        {
+                            event1000 = kafkaService.CreateBrokerPackage(registry, analogValue);
+                        }
+                    }
                     break;
                 case BacnetObjectTypes.OBJECT_BINARY_INPUT:
                     bool? binaryValue = ReadBinary(registry);
-                    event1000 = kafkaService.CreateBrokerPackage(registry, binaryValue);
+                    registry.UpdateRegistry(binaryValue);
+                    ReplaceRegistry(registry);
+                    if (registry.ShouldSendToBroker(binaryValue))
+                    {
+                        if (binaryValue != null)
+                        {
+                            event1000 = kafkaService.CreateBrokerPackage(registry, binaryValue);
+                        }
+                    }
                     break;
             }
             
