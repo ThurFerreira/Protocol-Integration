@@ -153,6 +153,8 @@ public class BACnetService(
                         if (analogValue != null)
                         {
                             event1000 = kafkaService.CreateBrokerPackage(registry, analogValue);
+                            kafkaService.Publish(registry.TopicoBroker, event1000);
+
                         }
                     }
                     break;
@@ -165,17 +167,16 @@ public class BACnetService(
                         if (binaryValue != null)
                         {
                             event1000 = kafkaService.CreateBrokerPackage(registry, binaryValue);
+                            kafkaService.Publish(registry.TopicoBroker, event1000);
                         }
                     }
                     break;
             }
-            
-            kafkaService.Publish(registry.TopicoBroker, event1000);
 
         }
         catch (Exception e)
         {
-            Console.WriteLine("Error on monitor supervisory modbus " + e.Message);
+            Console.WriteLine("Error on monitor supervisory bacnet " + e.Message);
             report.ModerateException(Status.ERROR);
         }
     }
@@ -184,37 +185,42 @@ public class BACnetService(
     {
         BacnetClient _bacnetClient = BACnetClientList.ContainsKey(registry.Ip) && BACnetClientList[registry.Ip] != null
             ? BACnetClientList[registry.Ip]
-            : new BacnetClient(new BacnetIpUdpProtocolTransport(registry.Porta, false));
+            : new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));
         _bacnetClient.Start();
 
         BacnetAddress bacnetAddress = new BacnetAddress(BacnetAddressTypes.IP, registry.Ip);
-        var objectId = new BacnetObjectId(registry.BacnetObjectTypes, 1);
-        if (_bacnetClient.ReadPropertyRequest(
-                bacnetAddress,
-                objectId,
-                BacnetPropertyIds.PROP_PRESENT_VALUE,
-                out IList<BacnetValue> values
-            ))
+        var objectId = new BacnetObjectId(registry.BacnetObjectTypes, registry.Instance);
+        try
         {
-            return Convert.ToSingle(values[0].Value);
+            if (_bacnetClient.ReadPropertyRequest(
+                    bacnetAddress,
+                    objectId,
+                    BacnetPropertyIds.PROP_PRESENT_VALUE,
+                    out IList<BacnetValue> values
+                ))
+            {
+                return Convert.ToSingle(values[0].Value);
+            }
         }
-        else
+        catch(Exception e)
         {
             report.LightException(Status.EMPTY_READ);
             Console.WriteLine("Falha na leitura.");
             return null;
 
         }
+
+        return null;
     }
 
     public bool? ReadBinary(BACnetRegistry registry)
     {
         BacnetClient _bacnetClient = BACnetClientList.ContainsKey(registry.Ip) && BACnetClientList[registry.Ip] != null
             ? BACnetClientList[registry.Ip]
-            : new BacnetClient(new BacnetIpUdpProtocolTransport(registry.Porta, false));
+            : new BacnetClient(new BacnetIpUdpProtocolTransport(0xBAC0, false));
         _bacnetClient.Start();
         BacnetAddress bacnetAddress = new BacnetAddress(BacnetAddressTypes.IP, registry.Ip);
-        var objectId = new BacnetObjectId(registry.BacnetObjectTypes, 1);
+        var objectId = new BacnetObjectId(registry.BacnetObjectTypes, registry.Instance);
         if (_bacnetClient.ReadPropertyRequest(
                 bacnetAddress,
                 objectId,
