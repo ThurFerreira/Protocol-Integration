@@ -18,7 +18,7 @@ namespace integra_dados.Supervisory.OPC;
 public class OpcService
 {
     private static Dictionary<int, OpcRegistry> registries = new Dictionary<int, OpcRegistry>();
-    private ApplicationConfiguration config = new ApplicationConfiguration();
+    private static ApplicationConfiguration config = new ApplicationConfiguration();
     private IRepository<OpcRegistry> _opcRepository;
     private KafkaService _kafkaService;
     private Report _report;
@@ -49,7 +49,7 @@ public class OpcService
         config.Validate(ApplicationType.Client);
     }
 
-    public async Task<Session> ConnectClientOpc(OpcRegistry registry)
+    public static async Task<Session> ConnectClientOpc(OpcRegistry registry)
     {
         int tentativas = 0;
         // string link = "opc.tcp://10.3.195.224:4840";
@@ -134,6 +134,71 @@ public class OpcService
         }
 
         return new DataValueCollection();
+    }
+
+    public static void WriteNodes(Event1000_2 event10002)
+    {
+        OpcRegistry registry = registries[event10002.IdSistema];
+        clientesConectados.TryGetValue(registry.GetConnectionLink(), out Session? opcClient);
+        if (opcClient == null || !opcClient.Connected)
+        {
+            opcClient = ConnectClientOpc(registry).Result;
+        }
+
+        if (opcClient != null && opcClient.Connected)
+        {
+            WriteValueCollection valuesToWrite = new WriteValueCollection();
+            StatusCodeCollection results = new StatusCodeCollection();
+            DiagnosticInfoCollection diagnosticInfos;
+            bool? firstValue = null;
+            bool? secondValue = null;
+
+            switch (event10002.WriteProtocol)
+            {
+                case WriteProtocol.LATCH_ON:
+                    firstValue = true;
+                    break;
+                case WriteProtocol.LATCH_OFF:
+                    firstValue = true;
+                    break;
+                case WriteProtocol.PULSE_ON:
+                    firstValue = true;
+                    secondValue = false;
+                    break;
+                case WriteProtocol.PULSE_OFF:
+                    firstValue = false;
+                    secondValue = true;
+                    break;
+            }
+
+            if (firstValue.HasValue)
+            {
+                valuesToWrite = new WriteValueCollection { GetWriteValue(registry.NodeAddress[0], firstValue.Value) };
+                opcClient.Write(null, valuesToWrite, out results, out diagnosticInfos);
+            }
+
+            if (secondValue.HasValue)
+            {
+                valuesToWrite = new WriteValueCollection { GetWriteValue(registry.NodeAddress[0], secondValue.Value) };
+                opcClient.Write(null, valuesToWrite, out results, out diagnosticInfos);
+            }
+
+
+            if (StatusCode.IsGood(results[0]))
+                Console.WriteLine("Valor escrito com sucesso!");
+            else
+                Console.WriteLine($"Erro ao escrever: {results[0]}");
+        }
+    }
+
+    public static WriteValue GetWriteValue(string nodeId , bool value)
+    {
+        return new WriteValue
+        {
+            NodeId = new NodeId(nodeId),
+            AttributeId = Attributes.Value,
+            Value = new DataValue(new Variant())
+        };
     }
 
     public async Task<ResponseClient> Create(OpcRegistry registry)

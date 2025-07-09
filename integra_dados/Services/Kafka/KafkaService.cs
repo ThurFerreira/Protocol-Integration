@@ -113,10 +113,18 @@ public class KafkaService
                 try
                 {
                     result = consumer.Consume(cts.Token);
-
+                    var value = result.Message.Value;
                     if (result.Message.Value != null)
                     {
-                        writeDiscreteInput(result.Message.Value);
+                        switch (value.Protocol)
+                        {
+                            case Protocol.modbus:
+                                writeDiscreteInput(value);
+                                break;
+                            case Protocol.opcua:
+                                writeDiscreteInput(value);
+                                break;
+                        }
                     }
                 }
                 catch (Exception e)

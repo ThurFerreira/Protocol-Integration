@@ -18,7 +18,8 @@ public class Scheduler(IServiceProvider serviceProvider, Report report, KafkaSer
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Task.Run(() => kafkaService.ConsumeAndWriteDispositive("SUPERVISORY_WRITE_TOPIC", event10002 => ModbusService.WriteDiscreteInput(event10002)));
-        
+        Task.Run(() => kafkaService.ConsumeAndWriteDispositive("SUPERVISORY_WRITE_TOPIC", event10002 => OpcService.WriteNodes(event10002)));
+
         // Inicializa o RegistryManager uma vez no início
         using (var supervisoryScope = serviceProvider.CreateScope())
         {
