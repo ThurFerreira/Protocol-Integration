@@ -5,6 +5,7 @@ using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Util;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace integra_dados.Services.Kafka;
 
@@ -12,26 +13,27 @@ public class KafkaService
 {
     private readonly IProducer<string, string> _producer;
     private readonly ILogger<KafkaService> _logger;
-    public ConsumerConfig ConsumerConfig { get; set; }
     public ProducerConfig ProducerConfig { get; set; }
+    public JsonSerializerSettings JsonSettings { get; set; }
+    public KafkaConfig KafkaConfig { get; set; }
 
     
     public KafkaService(IOptions<KafkaConfig> kafkaConfig, ILogger<KafkaService> logger)
     {
         _logger = logger;
-        
-        //Configurando o producer kafka
-        ConsumerConfig = new ConsumerConfig()
-        {
-            BootstrapServers = kafkaConfig.Value.BootstrapServers,
-            AutoOffsetReset = AutoOffsetReset.Latest,
-            GroupId = "write-protocol-group"
-        };
+        KafkaConfig = kafkaConfig.Value;
         
         //Configurando o producer kafka
         ProducerConfig = new ProducerConfig()
         {
             BootstrapServers = kafkaConfig.Value.BootstrapServers,
+        };
+        
+        JsonSettings = new JsonSerializerSettings
+        {
+            MissingMemberHandling = MissingMemberHandling.Ignore,
+            NullValueHandling = NullValueHandling.Ignore,
+            Converters = { new StringEnumConverter() }
         };
 
         //criando de fato o produtor kafka
@@ -95,12 +97,23 @@ public class KafkaService
 
     public void ConsumeAndWriteDispositive(string topic, Action<Event1000_2> writeDiscreteInput)
     {
-        using var consumer = new ConsumerBuilder<string, Event1000_2>(ConsumerConfig).SetValueDeserializer(new SimpleJsonDeserializer<Event1000_2>()).Build();
-        consumer.Subscribe(topic);
+        var groupId = "consumer-" + new Random().Next(0, 100);
+        var config = new ConsumerConfig
+        {
+            BootstrapServers = KafkaConfig.BootstrapServers,
+            GroupId =  groupId,
+            AutoOffsetReset = AutoOffsetReset.Latest,
+        };
         
+
+        using var consumer = new ConsumerBuilder<Ignore, Event1000_2>(config).SetValueDeserializer(new SimpleJsonDeserializer<Event1000_2>()) .Build();
+
+        consumer.Subscribe(topic);
+
         CancellationTokenSource cts = new();
 
-        Console.CancelKeyPress += (_, e) => {
+        Console.CancelKeyPress += (_, e) =>
+        {
             e.Cancel = true;
             cts.Cancel();
         };
@@ -109,39 +122,78 @@ public class KafkaService
         {
             while (!cts.Token.IsCancellationRequested)
             {
-                ConsumeResult<string, Event1000_2> result = new ConsumeResult<string, Event1000_2>();
                 try
                 {
-                    result = consumer.Consume(cts.Token);
-                    var value = result.Message.Value;
-                    if (result.Message.Value != null)
+                    var result = consumer.Consume(cts.Token);
+                    var value= result.Message.Value;
+                    Console.WriteLine($"Mensagem recebida: {result.Message.Value}");
+                    if (value != null)
                     {
-                        switch (value.Protocol)
-                        {
-                            case Protocol.modbus:
-                                writeDiscreteInput(value);
-                                break;
-                            case Protocol.opcua:
-                                writeDiscreteInput(value);
-                                break;
-                        }
+                        writeDiscreteInput(value);
                     }
                 }
-                catch (Exception e)
+                catch (ConsumeException ex)
                 {
-                    Console.WriteLine("No messages in topic " + topic);
-                    Task.Delay(10000);
-
+                    Console.WriteLine($"Erro ao consumir: {ex.Error.Reason}");
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            Console.WriteLine("Consumer closed.");
+            Console.WriteLine("Cancelado.");
         }
         finally
         {
-            consumer.Close(); // fecha a conexão com o broker
+            consumer.Close();
         }
     }
+    
+    //     ConsumerConfig = new ConsumerConfig()
+    //     {
+    //         BootstrapServers = KafkaConfig.BootstrapServers,
+    //         AutoOffsetReset = AutoOffsetReset.Earliest,
+    //         GroupId = "write-protocol-group",
+    //         EnableAutoCommit = true
+    //     };
+    //     
+    //     using var consumer = new ConsumerBuilder<Ignore, string>(ConsumerConfig).Build();
+    //     consumer.Subscribe("SUPERVISORY_WRITE_TOPIC");
+    //     
+    //     // CancellationTokenSource cts = new();
+    //     //
+    //     // Console.CancelKeyPress += (_, e) => {
+    //     //     e.Cancel = true;
+    //     //     cts.Cancel();
+    //     //     cts.CancelAfter(TimeSpan.FromSeconds(10));
+    //     // };
+    //
+    //     try
+    //     {
+    //         while (true)
+    //         {
+    //             // ConsumeResult<Ignore, string> result = new ConsumeResult<Ignore, string>();
+    //             try
+    //             {
+    //                 var result = consumer.Consume(TimeSpan.FromSeconds(5));
+    //                 var value = JsonConvert.DeserializeObject<Event1000_2>(result.Message.Value, JsonSettings);
+    //                 Console.WriteLine("Mensagem recebida:\n" + result.Message.Value);
+    //
+
+    //             }
+    //             catch (Exception e)
+    //             {
+    //                 Console.WriteLine("No messages in topic " + topic + " " + e.Message);
+    //                 Task.Delay(10000);
+    //
+    //             }
+    //         }
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine("Consumer closed.");
+    //     }
+    //     finally
+    //     {
+    //         consumer.Close(); // fecha a conexão com o broker
+    //     }
 }

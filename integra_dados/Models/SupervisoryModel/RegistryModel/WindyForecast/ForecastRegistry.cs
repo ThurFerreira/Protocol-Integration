@@ -8,6 +8,6 @@ public class ForecastRegistry : Registry
 
     public ForecastRegistry()
     {
-        ReadProtocol = Models.Protocol.windy;
+        Protocol = DataProtocol.Protocol.windy;
     }
 }

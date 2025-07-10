@@ -205,7 +205,7 @@ public class BACnetService(
         catch(Exception e)
         {
             report.LightException(Status.EMPTY_READ);
-            Console.WriteLine("Falha na leitura.");
+            Console.WriteLine("Falha na leitura do dispositivo bacnet.");
             return null;
 
         }

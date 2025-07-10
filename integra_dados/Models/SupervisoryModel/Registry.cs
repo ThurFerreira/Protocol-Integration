@@ -1,3 +1,4 @@
+using integra_dados.Models.DataProtocol;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
@@ -29,7 +30,7 @@ public class Registry
     public string? TopicoBroker { get; set; }
     public bool OtimizarPublicacaoBroker { get; set; }
     public int FreqLeituraSeg { get; set; }
-    public Protocol? ReadProtocol { get; set; }
+    public Protocol? Protocol { get; set; }
     public WriteProtocol? WriteProtocol { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore] // Ignora ao serializar para JSON, equivalente ao @Transient

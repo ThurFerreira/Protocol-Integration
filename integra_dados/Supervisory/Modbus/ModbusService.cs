@@ -2,6 +2,7 @@ using System.Net;
 using EasyModbus;
 using EasyModbus.Exceptions;
 using integra_dados.Models;
+using integra_dados.Models.DataProtocol;
 using integra_dados.Models.Response;
 using integra_dados.Models.SupervisoryModel.RegistryModel.Modbus;
 using integra_dados.Repository;
@@ -448,7 +449,13 @@ public class ModbusService(
 
     public static bool? WriteDiscreteInput(Event1000_2? package1000_2)
     {
-        ModbusRegistry registry = registries[package1000_2.IdSistema];
+        registries.TryGetValue(package1000_2.IdSistema, out ModbusRegistry? registry);
+
+        if (registry == null)
+        {
+            return false;
+        }
+        
         ModbusClient modbusClient = ModbusClientList.ContainsKey(registry.Ip) && ModbusClientList[registry.Ip] != null
             ? ModbusClientList[registry.Ip]
             : new ModbusClient(registry.Ip, registry.Porta);
@@ -462,7 +469,7 @@ public class ModbusService(
         {
             try
             {
-                switch (registry.WriteProtocol)
+                switch (package1000_2.WriteProtocol)
                 {
                     case WriteProtocol.LATCH_ON:
                         modbusClient.WriteSingleCoil(registry.EnderecoInicio, true);
@@ -472,7 +479,7 @@ public class ModbusService(
                         break;
                     case WriteProtocol.PULSE_ON:
                         modbusClient.WriteSingleCoil(registry.EnderecoInicio, true);
-                        Task.Delay(1000);
+                        Task.Delay(1000).Wait();
                         modbusClient.WriteSingleCoil(registry.EnderecoInicio, false);
                         break;
                     case WriteProtocol.PULSE_OFF:

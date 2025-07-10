@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using integra_dados.Models;
+using integra_dados.Models.DataProtocol;
 using integra_dados.Models.Response;
 using integra_dados.Models.SupervisoryModel;
 using integra_dados.Models.SupervisoryModel.RegistryModel.OPCUA;

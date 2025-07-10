@@ -1,10 +1,10 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json.Converters;
 
-namespace integra_dados.Models;
+namespace integra_dados.Models.DataProtocol;
 
-[JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Protocol
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]public enum Protocol
 {
     //annotation for enum be written as string
     [EnumMember(Value = "modbus")] modbus,
